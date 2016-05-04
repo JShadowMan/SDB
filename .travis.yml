@@ -7,4 +7,8 @@ php:
   - '7.0'
 
 before_script:
-  - cd .
+  - composer install
+  - cd tests
+
+script:
+  - phpunit -v
