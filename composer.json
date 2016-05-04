@@ -1,0 +1,21 @@
+{
+  "name" : "JShadowMan/Db",
+  "description": "A Database helper for PHP",
+  "keywords": ["database", "library"],
+  "license": "MIT",
+  "type": "library",
+  "require": {
+    "php": ">=5.4.0"
+  },
+  "require-dev": {
+    "satooshi/php-coveralls":"*",
+    "phpunit/phpunit": "*"
+  },
+  "autoload": {
+    "files": [ "example.php" ]
+  },
+  "repositories" : [ {
+    "type" : "composer",
+    "url" : "https://packagist.org/"
+  } ]
+}
