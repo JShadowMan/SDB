@@ -1,3 +1,3 @@
 <?php
-$db = new Db();
+// $db = new Db();
 exit;
