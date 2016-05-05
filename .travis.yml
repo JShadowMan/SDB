@@ -7,8 +7,12 @@ php:
   - '7.0'
 
 before_script:
-  - composer install
+  - composer install --prefer-dist --dev
   - cd tests
 
 script:
-  - phpunit -v
+  - mkdir -p build/logs
+  - ./vendor/bin/phpunit --coverage-clover build/logs/clover.xml
+
+after_script:
+  - php vendor/bin/coveralls -v
