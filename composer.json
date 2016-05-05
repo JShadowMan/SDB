@@ -1,6 +1,6 @@
 {
   "name" : "JShadowMan/Db",
-  "description": "A Database helper for PHP",
+  "description": "Database helper for PHP",
   "keywords": ["database", "library"],
   "license": "MIT",
   "type": "library",

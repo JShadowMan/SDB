@@ -19,5 +19,9 @@ class Db {
     public static function factory() {
         
     }
+
+    public function init() {
+        return 'initialized';
+    }
 }
 ?>
