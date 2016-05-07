@@ -11,7 +11,7 @@ before_script:
   - cd tests
 
 script:
-  - mkdir -p build/logs
+  - mkdir -pv build/logs
   - ../vendor/bin/phpunit --coverage-clover ./build/logs/clover.xml
 
 after_script:
