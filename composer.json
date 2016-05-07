@@ -4,6 +4,14 @@
   "keywords": ["database", "library"],
   "license": "MIT",
   "type": "library",
+  "authors": [
+    {
+      "name": "Wang ChengJie",
+      "email": "jshadowman@1663.com",
+      "homepage": "http://www.jshadowman.com",
+      "role": "Developer"
+    }
+  ],
   "require": {
     "php": ">=5.4.0"
   },
@@ -12,10 +20,6 @@
     "phpunit/phpunit": "*"
   },
   "autoload": {
-    "files": [ "example.php" ]
-  },
-  "repositories" : [ {
-    "type" : "composer",
-    "url" : "https://packagist.org/"
-  } ]
+    "files": [ "./src/Db.php" ]
+  }
 }

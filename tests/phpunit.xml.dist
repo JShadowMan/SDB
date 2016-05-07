@@ -1,7 +1,12 @@
-<phpunit bootstrap="./Bootstrap.php" colors="true">
+<phpunit bootstrap="./Bootstrap.php"
+         colors="true"
+         convertErrorsToExceptions="true"
+         convertNoticesToExceptions="true"
+         convertWarningsToExceptions="true"
+         >
     <testsuites>
         <testsuite name="Db Test Suite">
-            <directory>./DbTest</directory>
+            <directory>./DbTest/</directory>
         </testsuite>
     </testsuites>
     <filter>
@@ -10,12 +15,11 @@
             <exclude>
                 <directory>../vendor/</directory>
                 <directory>../tests/</directory>
-                <file>../example.php</file>
             </exclude>
         </whitelist>
     </filter>
     <logging>
-        <log type="coverage-clover" target="build/logs/clover.xml"/>
+        <log type="coverage-clover" target="./build/logs/clover.xml"/>
         <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
     </logging>
 </phpunit>
