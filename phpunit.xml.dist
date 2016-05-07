@@ -6,21 +6,21 @@
          >
     <testsuites>
         <testsuite name="Db Test Suite">
-            <directory>tests/DbTest</directory>
+            <directory>./tests</directory>
         </testsuite>
     </testsuites>
     <filter>
         <whitelist>
-            <directory>./src/</directory>
-            <directory>./</directory>
+            <directory>./src</directory>
             <exclude>
-                <directory>./vendor/</directory>
-                <directory>./tests/</directory>
+                <directory>./vendor</directory>
+                <directory>./tests</directory>
                 <file>./example.php</file>
             </exclude>
         </whitelist>
     </filter>
     <logging>
         <log type="coverage-clover" target="build/logs/clover.xml"/>
+        <log type="coverage-text" target="php://stdout" showUncoveredFiles="true"/>
     </logging>
 </phpunit>
