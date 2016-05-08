@@ -17,7 +17,7 @@ class Db {
     }
 
     public static function factory($adapter, $prefix = null) {
-        return new Db();
+        return new Db($adapter, $prefix);
     }
 
     public static function server() {
