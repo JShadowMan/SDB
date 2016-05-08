@@ -1,5 +1,5 @@
 {
-  "name" : "jshadowman/db",
+  "name": "jshadowman/db",
   "description": "Database helper for PHP",
   "keywords": ["database", "library"],
   "license": "MIT",
