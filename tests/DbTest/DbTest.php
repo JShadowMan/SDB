@@ -4,7 +4,7 @@
  */
 class DbTest extends PHPUnit_Framework_TestCase {
     public static function db($adapter = Db::DB_ADAPTER_MYSQL, $prefix = null) {
-        return \Db::factory($adapter, $prefix);
+        return Db::factory($adapter, $prefix);
     }
 
     public function testServer() {
