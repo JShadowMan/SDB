@@ -1,3 +1,4 @@
 <?php
 $loader = include __DIR__ . '/../vendor/autoload.php';
-$loader->add('Db', __DIR__ . '/../src/');
+// $loader->addPsr4('Db\\', 'src');
+// $loader->addPsr4('Db\\Adapter\\', 'src/Apapter');

@@ -1,7 +1,7 @@
 <?php
-require_once 'src/Db.php';
+require_once 'src/Helper.php';
 
-$db = new Db();
+$db = new Helper();
 
 echo $db->init();
 exit;

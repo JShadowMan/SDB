@@ -20,6 +20,6 @@
     "phpunit/phpunit": "*"
   },
   "autoload": {
-    "files": [ "./src/Db.php" ]
+    "psr-4": { "Db\\": "src" }
   }
 }
