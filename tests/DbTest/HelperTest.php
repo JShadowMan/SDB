@@ -26,7 +26,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     public function testCustomClass() {
         $helper = self::helper(\Db\Helper::DB_ADAPTER_ORACLE, 'table_');
 
-        $this->assertEquals(true, $helper->getAdapter() instanceof \Db\_Abstract\Abstract_Adapter);
+        $this->assertEquals(false, $helper->getAdapter() instanceof \Db\_Abstract\Abstract_Adapter);
         $this->assertEquals('table_', $helper->getPrefix());
     }
 }
