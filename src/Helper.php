@@ -1,12 +1,12 @@
 <?php
 namespace Db;
 
-use Db\_Abstract\Abstract_Adapter;
-use Db\Adapter\Adapter_MySQL;
 /**
  * @author ShadowMan
  */
 
+// get_loaded_extensions()
+// extension_loaded()
 class Helper {
     /**
      * store server infomation
@@ -19,7 +19,7 @@ class Helper {
     /**
      * store server adapter infomation
      * 
-     * @var Abstract_Adapter
+     * @var \Db\_Abstract\Abstract_Adapter
      */
     private $_adapter = null;
 
@@ -31,6 +31,8 @@ class Helper {
      */
     private $_prefix  = null;
 
+    private $_instancePool = array();
+
     /**
      * 
      * @param string $adapter
@@ -40,28 +42,52 @@ class Helper {
         if (!in_array($adapter, array(self::DB_ADAPTER_MYSQL, self::DB_ADAPTER_ORACLE, self::DB_ADAPTER_SQL_SERVER, self::DB_ADAPTER_SQLITE))) {
             throw new \Exception('Adapter Not Defined.', 1);
         }
-        if ($prefix != null && !is_string($prefix)) {
+        if (!is_string($prefix)) {
             throw new \Exception('table prefix is not string', 2);
         }
 
         switch ($adapter) {
-            case self::DB_ADAPTER_MYSQL: $this->_adapter = new Adapter\Adapter_MySQL(); break;
-            case self::DB_ADAPTER_ORACLE:
+            case self::DB_ADAPTER_MYSQL: $this->_adapter = new Adapter\Adapter_MySQL(self::$_server); break;
+            case self::DB_ADAPTER_ORACLE: 
             case self::DB_ADAPTER_SQL_SERVER:
             case self::DB_ADAPTER_SQLITE:
             default:
-                break;
+                throw new \Exception('Adapter Class Not Defined.', 1);
         }
 
-        $this->_prefix  = $prefix;
+        $this->_prefix = $prefix;
     }
 
-    public static function factory($adapter, $prefix = null) {
-        return new Helper($adapter, $prefix);
+    /**
+     * create instance by factory
+     * 
+     * @param string $adapter
+     * @param string $prefix
+     * @param string $connect
+     */
+    public static function factory($adapter, $prefix = null, $connect = false) {
+        $helper = new Helper($adapter, $prefix);
+
+        return $connect ? $helper->connect() : $helper;
     }
 
-    public static function server() {
-        return 'SERVER';
+    public static function server($host, $port, $user, $password, $database, $mutliServer = false) {
+        self::$_server = array_merge(($mutliServer) ? self::$_server : array(), array(
+            'host'     => $host,
+            'port'     => $port,
+            'user'     => $user,
+            'password' => $password,
+            'database' => $database
+        ));
+    }
+
+    public static function getServer() {
+        return empty(self::$_server) ? null : self::$_server;
+    }
+
+    public function connect() {
+        $this->_adapter->connect();
+        return $this;
     }
 
     /**
@@ -76,6 +102,30 @@ class Helper {
         return $this->_prefix;
     }
 
+    private function builder() {
+        return new Query($this->_adapter, $this->_prefix);
+    }
+
+    public function select() {
+        return self::builder()->select(func_get_args());
+    }
+
+    public function update($table) {
+        return self::builder()->update($table);
+    }
+
+    public function insert($table) {
+        return self::builder()->insert($table);
+    }
+
+    public function delete($table) {
+        return self::builder()->delete($table);
+    }
+
+    public function change($table) {
+        return self::builder()->change($table);
+    }
+
     # Database: MySQL
     const DB_ADAPTER_MYSQL      = 'MySQL';
 
@@ -88,17 +138,20 @@ class Helper {
     # Database: SQLite
     const DB_ADAPTER_SQLITE     = 'SQLITE';
 
-    # CRUD Operator: Create
-    const DB_OPERATOR_CREATE    = 'CREATE';
+    # CRUD Operator: Insert
+    const DB_OPERATOR_INSERT    = 'INSERT';
 
-    # CRUD Operator: Read
-    const DB_OPERATOR_READ      = 'READ';
+    # CRUD Operator: Select
+    const DB_OPERATOR_SELECT    = 'SELECT';
 
     # CRUD Operator: Update
     const DB_OPERATOR_UPDATE    = 'UPDATE';
 
     # CRUD Operator: Delete
     const DB_OPERATOR_DELETE    = 'DELETE';
+
+    # Operator: Change
+    const DB_OPERATOR_CHANGE    = 'CHANGE';
 }
 
 ?>

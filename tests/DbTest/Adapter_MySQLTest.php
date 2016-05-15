@@ -1,18 +1,15 @@
 <?php
+use Db\Helper;
 /**
  *
  * @author ShadowMan
  */
 class Adapter_MySQLTest extends \PHPUnit_Framework_TestCase {
-    public static function helper($adapter = \Db\Helper::DB_ADAPTER_MYSQL, $prefix = null) {
-        return new \Db\Helper($adapter, $prefix);
-    }
-
     public function testAdapterMySQLisAvaliable() {
-        $helper = self::helper();
+        $helper = \Db\Helper::factory(\Db\Helper::DB_ADAPTER_MYSQL, 'table_');
         $adapter = $helper->getAdapter();
 
-        $this->assertEquals(true, $adapter->isAvaliable());
+        $this->assertEquals(extension_loaded('mysqli') ? true : false, $adapter->isAvaliable());
     }
 }
 
