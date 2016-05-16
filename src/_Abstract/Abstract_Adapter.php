@@ -18,6 +18,8 @@ interface Abstract_Adapter {
 
     public static function escapeValue($value);
 
+    public static function tableFilter($table, $prefix = null);
+
     public static function parseSelect($preBuilder);
 
     public static function parseUpdate($preBuilder);

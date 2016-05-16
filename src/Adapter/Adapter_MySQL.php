@@ -33,6 +33,9 @@ class Adapter_MySQL implements Abstract_Adapter {
      * @param string $prefix
      */
     function __construct($server) {
+        if (empty($server)) {
+            throw new \Exception('Did not add Server', 2);
+        }
         $this->_server = $server;
     }
 
@@ -103,6 +106,10 @@ class Adapter_MySQL implements Abstract_Adapter {
                 throw new \Exception('Did not add Server', 2);
             }
         }
+    }
+
+    public static function tableFilter($table, $prefix = null) {
+        return '`' . ((strpos($table, 'table.') === 0) ? substr_replace($table, $prefix, 0, 6) : $table) . '`';
     }
 
     /**

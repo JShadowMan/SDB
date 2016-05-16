@@ -31,7 +31,14 @@ class Helper {
      */
     private $_prefix  = null;
 
+    /**
+     * store query object history
+     * 
+     * @var array of \Db\Query
+     */
     private $_instancePool = array();
+
+    private $_result = array();
 
     /**
      * 
@@ -42,8 +49,11 @@ class Helper {
         if (!in_array($adapter, array(self::DB_ADAPTER_MYSQL, self::DB_ADAPTER_ORACLE, self::DB_ADAPTER_SQL_SERVER, self::DB_ADAPTER_SQLITE))) {
             throw new \Exception('Adapter Not Defined.', 1);
         }
-        if (!is_string($prefix)) {
-            throw new \Exception('table prefix is not string', 2);
+        if ($prefix !== null && !is_string($prefix)) {
+            throw new \Exception('table prefix is not string or null', 2);
+        }
+        if (empty(self::$_server)) {
+            throw new \Exception('Did not add Server', 2);
         }
 
         switch ($adapter) {
@@ -54,7 +64,6 @@ class Helper {
             default:
                 throw new \Exception('Adapter Class Not Defined.', 1);
         }
-
         $this->_prefix = $prefix;
     }
 
@@ -71,18 +80,29 @@ class Helper {
         return $connect ? $helper->connect() : $helper;
     }
 
-    public static function server($host, $port, $user, $password, $database, $mutliServer = false) {
-        self::$_server = array_merge(($mutliServer) ? self::$_server : array(), array(
+    public static function server($host, $port, $user, $password, $database, $mutliServer = false, $alias = null) {
+        self::$_server[$mutliServer ? (($alias === null) ? count(self::$_server) : $alias) : 0] = array(
             'host'     => $host,
             'port'     => $port,
             'user'     => $user,
             'password' => $password,
             'database' => $database
-        ));
+        );
+
+        if ($mutliServer === false && count(self::$_server) != 1) {
+            foreach (self::$_server as $key => $value) {
+                if ($key !== 0) {
+                    unset(self::$_server[$key]);
+                }
+            }
+        }
     }
 
-    public static function getServer() {
-        return empty(self::$_server) ? null : self::$_server;
+    public static function getServer($alias = null) {
+        return empty(self::$_server) ? null
+            : (($alias == null) ? ((count(self::$_server) == 1) ? self::$_server[0] : self::$_server)
+                : (array_key_exists($alias, self::$_server) ? self::$_server[$alias]
+                    : null));
     }
 
     public function connect() {
@@ -103,7 +123,7 @@ class Helper {
     }
 
     private function builder() {
-        return new Query($this->_adapter, $this->_prefix);
+        return $this->_instancePool[] = new Query($this->_adapter, $this->_prefix);
     }
 
     public function select() {
@@ -124,6 +144,15 @@ class Helper {
 
     public function change($table) {
         return self::builder()->change($table);
+    }
+
+    public function action() {
+        $lastInstance = current((empty($this->_instancePool)) ? array() : array_slice($this->_instancePool, -1, 1));
+        return ($lastInstance instanceof Query) ? $lastInstance->action() : null;
+    }
+
+    public function cleanPool() {
+        unset($this->_instancePool);
     }
 
     # Database: MySQL

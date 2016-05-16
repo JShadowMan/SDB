@@ -17,8 +17,11 @@ class Query {
 
     private $_action = null;
 
+    private $_prefix = null;
+
     function __construct(&$adapter, $prefix = null) {
         $this->_adapter = $adapter;
+        $this->_prefix  = $prefix;
         $this->_preBuilder = array(
             'table'  => null,
             'rows'   => array('keys' => array(), 'values' => array()),
@@ -34,12 +37,12 @@ class Query {
         );
     }
 
-    private function escapeField($column) {
-        return $this->_adapter->escapeKey($column);
+    private function escapeField($field) {
+        return $this->_adapter->escapeKey($field);
     }
 
     private function tableFilter($table) {
-        return '`' . ((strpos($table, 'table.') === 0) ? substr_replace($table, $this->_prefix, 0, 6) : $table) . '`';
+        return $this->_adapter->tableFilter($table, $this->_prefix);
     }
 
     public function select($fields) {
@@ -100,12 +103,13 @@ class Query {
     }
 
     public function __toString() {
-        var_dump($this->_preBuilder, $this->_action);
         switch ($this->_action) {
             case Helper::DB_OPERATOR_SELECT: return $this->_adapter->parseSelect($this->_preBuilder);
             case Helper::DB_OPERATOR_UPDATE: return $this->_adapter->parseUpdate($this->_preBuilder);
             case Helper::DB_OPERATOR_INSERT: return $this->_adapter->parseInsert($this->_preBuilder);
             case Helper::DB_OPERATOR_DELETE: return $this->_adapter->parseDelete($this->_preBuilder);
+            case Helper::DB_OPERATOR_CHANGE: return $this->_adapter->parseChange($this->_preBuilder);
+            default: throw new \Exception('Adapter Not Defined.', 1);
         }
     }
 }
