@@ -7,8 +7,7 @@ if (function_exists('spl_autoload_register')) {
 
 use Db\Helper;
 
-Helper::server('localhost', '3306', 'root', 'root', 'test');
-Helper::server('localhost', '3306', 'root', 'root', 'test');
+// Helper::server('localhost', '3306', 'root', 'root', 'test');
 
 $helper = new Helper(Helper::DB_ADAPTER_MYSQL, 'table_');
 

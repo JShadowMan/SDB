@@ -1,9 +1,9 @@
 <?php
-namespace Db;
-
 /**
  * @author ShadowMan
  */
+
+namespace Db;
 
 // get_loaded_extensions()
 // extension_loaded()
