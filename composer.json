@@ -20,6 +20,6 @@
     "phpunit/phpunit": "*"
   },
   "autoload": {
-    "psr-4": { "Db\\": "src" }
+    "psr-4": { "SDB\\": "src" }
   }
 }
