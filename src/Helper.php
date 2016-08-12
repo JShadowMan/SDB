@@ -27,20 +27,30 @@ class Helper {
      * @param string $tablePrefix
      */
     public function __construct($adapter, $tablePrefix) {
-        
+        if (!in_array($adapter, array(self::ADAPTER_MYSQL, 
+                self::ADAPTER_ORACLE, self::ADAPTER_SQL_SERVER, self::ADAPTER_SQLITE))) {
+            throw new \Exception('adapter not found', 0);
+        }
+
+        $adapter = "SDB\\Adapter\\{$adapter}";
+        if (!call_user_func(array($adapter, 'avaliable'))) {
+            throw new \Exception('adapter is not avaliable', 0);
+        }
     }
 
     public static function server($host, $port, $user, $password, $database, $charset = 'utf8') {
         if (self::$_driver === null) {
             self::initDriver();
         }
-        
+
         $args = array_map(function($value) {
             if (!is_string($value)) {
                 return strval($value);
             }
             return $value;
         }, func_get_args());
+
+        self::$_server[] = array_merge($args, array( '__connectable__' => false ));
     }
 
     private static function initDriver() {
@@ -54,14 +64,16 @@ class Helper {
             # PDO module support is not enabled, check mysql, oracle and more
             if (empty($filtered)) {
                 $filtered = array_filter($loaded, function($value) {
-                    return in_array($value, array('mysqli', 'oci'));
+                    return in_array($value, array('mysql', 'mysqli', 'oci'));
                 });
             }
 
             # Database module support is not enabled. raise Exception
             if (empty($filtered)) {
-                throw new \Exception('', '');
+                throw new \Exception('database module support is not enabled', 0);
             }
+
+            self::$_driver = $filtered;
         }
     }
 
