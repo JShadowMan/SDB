@@ -18,7 +18,26 @@ class Helper {
      */
     private static $_server = array();
 
+    /**
+     * driver information
+     * 
+     * @var array
+     */
     private static $_driver = null;
+
+    /**
+     * adapter instance
+     * 
+     * @var SDB\Abstracts\Adapter
+     */
+    private $_adapter = null;
+
+    /**
+     * table prefix
+     * 
+     * @var string
+     */
+    private $_tablePrefix = null;
 
     /**
      * Helper constructor
@@ -26,18 +45,44 @@ class Helper {
      * @param string $adapter
      * @param string $tablePrefix
      */
-    public function __construct($adapter, $tablePrefix) {
+    public function __construct($tablePrefix, $adapter = null) {
         if (!in_array($adapter, array(self::ADAPTER_MYSQL, 
                 self::ADAPTER_ORACLE, self::ADAPTER_SQL_SERVER, self::ADAPTER_SQLITE))) {
-            throw new \Exception('adapter not found', 0);
+            throw new \Exception('adapter not found', 1996);
+        }
+
+        if (!is_string($tablePrefix)) {
+            throw new \Exception('table prefix except string', 1996);
+        }
+        $this->_tablePrefix = $tablePrefix;
+
+        if ($adapter === null) {
+            if (in_array(self::ADAPTER_MYSQL, self::$_driver)) {
+                $adapter = self::ADAPTER_MYSQL;
+            } else {
+                $adapter = current(self::$_driver);
+            }
         }
 
         $adapter = "SDB\\Adapter\\{$adapter}";
         if (!call_user_func(array($adapter, 'avaliable'))) {
-            throw new \Exception('adapter is not avaliable', 0);
+            throw new \Exception('adapter is not avaliable', 1996);
+        } else {
+            $this->_adapter = new $adapter;
         }
+        var_dump($this);
     }
 
+    /**
+     * server information
+     * 
+     * @param string $host
+     * @param string|int $port
+     * @param string $user
+     * @param string $password
+     * @param string $database
+     * @param string $charset
+     */
     public static function server($host, $port, $user, $password, $database, $charset = 'utf8') {
         if (self::$_driver === null) {
             self::initDriver();
@@ -64,16 +109,25 @@ class Helper {
             # PDO module support is not enabled, check mysql, oracle and more
             if (empty($filtered)) {
                 $filtered = array_filter($loaded, function($value) {
-                    return in_array($value, array('mysql', 'mysqli', 'oci'));
+                    return in_array($value, array('mysqli', 'oci'));
                 });
             }
 
             # Database module support is not enabled. raise Exception
             if (empty($filtered)) {
-                throw new \Exception('database module support is not enabled', 0);
+                throw new \Exception('database module support is not enabled', 1996);
             }
 
-            self::$_driver = $filtered;
+            # Create driver => adapter mapping
+            foreach ($filtered as $driver) {
+                switch ($driver) {
+                    case 'pdo_mysql':
+                    case 'mysqli':   self::$_driver[$driver] = self::ADAPTER_MYSQL; break;
+                    case 'pdo_oci':
+                    case 'oci':      self::$_driver[$driver] = self::ADAPTER_ORACLE; break;
+                    default: throw new \Exception('fatal error', 1996);
+                }
+            }
         }
     }
 

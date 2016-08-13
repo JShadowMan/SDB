@@ -8,10 +8,10 @@
 use SDB\Helper;
 
 class HelperTest extends \PHPUnit_Framework_TestCase {
-    public function instance($adapter, $tablePrefix) {
+    public function instance($tablePrefix, $adapter) {
         Helper::server('127.0.0.1', 3306, 'root', 'root', 'here');
 
-        return new Helper($adapter, $tablePrefix);
+        return new Helper($tablePrefix, $adapter);
     }
 
     public function testServer() {
@@ -22,10 +22,8 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testInvalidAdapter() {
-        $this->instance('INVALID_ADAPTER', 'here_');
+        $this->instance('here_', 'INVALID_ADAPTER');
     }
-
-    
 }
 
 ?>
