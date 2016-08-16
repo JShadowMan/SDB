@@ -12,3 +12,5 @@ if (function_exists('spl_autoload_register')) {
 Helper::server('127.0.0.1', 3306, 'root', 'root', 'here');
 
 $helper = new Helper('here_', Helper::ADAPTER_MYSQL);
+
+$helper->select(array('table.articles.id', 'abc'), 'table.article.contents', 'id');

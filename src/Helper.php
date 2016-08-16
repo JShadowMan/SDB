@@ -48,14 +48,15 @@ class Helper {
     public function __construct($tablePrefix, $adapter = null) {
         if (!in_array($adapter, array(self::ADAPTER_MYSQL, 
                 self::ADAPTER_ORACLE, self::ADAPTER_SQL_SERVER, self::ADAPTER_SQLITE))) {
-            throw new \Exception('adapter not found', 1996);
+            throw new \Exception('SDB: adapter not found', 1996);
         }
 
         if (!is_string($tablePrefix)) {
-            throw new \Exception('table prefix except string', 1996);
+            throw new \Exception('SDB: table prefix except string', 1996);
         }
         $this->_tablePrefix = $tablePrefix;
 
+        # default using mysql, if mysql is disable, that using first database adapter
         if ($adapter === null) {
             if (in_array(self::ADAPTER_MYSQL, self::$_driver)) {
                 $adapter = self::ADAPTER_MYSQL;
@@ -64,13 +65,12 @@ class Helper {
             }
         }
 
+        # if adapter avaliable, creating the instance
         $adapter = "SDB\\Adapter\\{$adapter}";
-        if (!call_user_func(array($adapter, 'avaliable'))) {
-            throw new \Exception('adapter is not avaliable', 1996);
-        } else {
-            $this->_adapter = new $adapter;
+        if (!call_user_func(array(($this->_adapter = new $adapter($this->_tablePrefix)), 'avaliable'))) {
+            unset($this->_adapter);
+            throw new \Exception('SDB: adapter is not avaliable', 1996);
         }
-        var_dump($this);
     }
 
     /**
@@ -98,6 +98,12 @@ class Helper {
         self::$_server[] = array_merge($args, array( '__connectable__' => false ));
     }
 
+    /**
+     * private: initialize driver
+     * create driver => adapter mapping
+     * 
+     * @throws \Exception
+     */
     private static function initDriver() {
         $loaded = get_loaded_extensions();
 
@@ -115,7 +121,7 @@ class Helper {
 
             # Database module support is not enabled. raise Exception
             if (empty($filtered)) {
-                throw new \Exception('database module support is not enabled', 1996);
+                throw new \Exception('SDB: database module support is not enabled', 1996);
             }
 
             # Create driver => adapter mapping
@@ -125,10 +131,48 @@ class Helper {
                     case 'mysqli':   self::$_driver[$driver] = self::ADAPTER_MYSQL; break;
                     case 'pdo_oci':
                     case 'oci':      self::$_driver[$driver] = self::ADAPTER_ORACLE; break;
-                    default: throw new \Exception('fatal error', 1996);
+                    default: throw new \Exception("SDB: fatal error, driver({$driver}) invalid.", 1996);
                 }
             }
         }
+    }
+
+    /**
+     * return Query instance
+     * 
+     * @return \SDB\Query
+     */
+    public function builder() {
+        return new Query($this->_adapter);
+    }
+
+    public function select() {
+        return $this->builder()->select(func_get_args());
+    }
+
+    public function update($table) {
+        $this->_table = $table;
+        return $this->builder()->update($table);
+    }
+
+    public function insert($table) {
+        
+    }
+
+    public function delete($table) {
+        
+    }
+
+    public function query() {
+        
+    }
+
+    public function prepare() {
+        
+    }
+
+    public function functions($function, $args) {
+        
     }
 
     # Database: MySQL
