@@ -26,6 +26,13 @@ class Helper {
     private static $_driver = null;
 
     /**
+     * strict mode flag
+     * 
+     * @var boolean
+     */
+    private static $_adapterStrictMode = true;
+
+    /**
      * adapter instance
      * 
      * @var SDB\Abstracts\Adapter
@@ -74,6 +81,13 @@ class Helper {
     }
 
     /**
+     * disable strict mode for adapter mapping
+     */
+    public static function disableStrictMode() {
+        self::$_adapterStrictMode = true;
+    }
+
+    /**
      * server information
      * 
      * @param string $host
@@ -104,7 +118,7 @@ class Helper {
      * 
      * @throws \Exception
      */
-    private static function initDriver() {
+    private static function initDriver($raise = true) {
         $loaded = get_loaded_extensions();
 
         if (in_array('PDO', $loaded) && extension_loaded('PDO')) {
@@ -128,10 +142,16 @@ class Helper {
             foreach ($filtered as $driver) {
                 switch ($driver) {
                     case 'pdo_mysql':
-                    case 'mysqli':   self::$_driver[$driver] = self::ADAPTER_MYSQL; break;
+                    case 'mysqli':    self::$_driver[$driver] = self::ADAPTER_MYSQL;  break;
                     case 'pdo_oci':
-                    case 'oci':      self::$_driver[$driver] = self::ADAPTER_ORACLE; break;
-                    default: throw new \Exception("SDB: fatal error, driver({$driver}) invalid.", 1996);
+                    case 'oci':       self::$_driver[$driver] = self::ADAPTER_ORACLE; break;
+                    case 'pgsql':
+                    case 'pdo_pgsql': self::$_driver[$driver] = self::ADAPTER_PGSQL;  break;
+                    case 'sqlite':
+                    case 'pdo_sqlite': self::$_driver[$driver] = self::ADAPTER_SQLITE;  break;
+                    default: if ($raise === true) {
+                        throw new \Exception("SDB: fatal error, driver({$driver}) invalid.\n" . serialize($filtered), 1996);
+                    }
                 }
             }
         }
@@ -186,6 +206,8 @@ class Helper {
 
     # Database: SQLite
     const ADAPTER_SQLITE     = 'SQLITE';
+
+    const ADAPTER_PGSQL      = 'PGSQL';
 
     # CRUD Operator: Insert
     const OPERATOR_INSERT    = 'INSERT';

@@ -6,8 +6,23 @@ php:
   - '5.6'
   - '7.0'
 
+services:
+  - mysql
+
+dist: trusty
+
+sudo: required
+
+addons:
+  apt:
+    packages:
+    - mysql-server-5.6
+    - mysql-client-core-5.6
+    - mysql-client-5.6
+
 before_script:
   - composer install --prefer-dist --dev --no-interaction
+  - mysql -uroot -e 'CREATE DATABASE IF NOT EXISTS `test`;'
 
 script:
   - mkdir -p build/logs
