@@ -34,11 +34,13 @@ class Query {
 
     private $_singleTableMode = true;
 
+    private $_queryAction = null;
+
     public function __construct(&$adapterInstance) {
         if ($adapterInstance instanceof Adapter) {
             $this->_adapterInstance = $adapterInstance;
         } else {
-            throw new \Exception('SDB: adapter invalid in Query Constructor', 1996);
+            throw new \Exception('SDB: Query: adapter invalid in Query Constructor', 1996);
         }
     }
 
@@ -49,6 +51,8 @@ class Query {
      * @return \SDB\Query
      */
     public function select(array $fields) {
+        $this->_queryAction = 'SELECT';
+
         if (empty($fields)) {
             $this->_preBuilder['fields'][] = '*';
         } else {
@@ -73,16 +77,54 @@ class Query {
     }
 
     /**
+     * SQL Basic Syntax: UPDATE
      * 
      * @param string $table
      */
     public function update($table) {
-        $this->_table = $table;
+        $this->_queryAction = 'UPDATE';
+        $this->_table = is_string($table) ? $table : strval($table);
+
+        return $this;
+    }
+
+    /**
+     * SQL Basic Syntax: INSERT
+     *
+     * @param string $table
+     */
+    public function insert($table) {
+        $this->_queryAction = 'INSERT';
+        $this->_table = is_string($table) ? $table : strval($table);
+
+        return $this;
+    }
+
+    /**
+     * SQL Basic Syntax: DELETE
+     *
+     * @param string $table
+     */
+    public function delete($table) {
+        $this->_queryAction = 'DELETE';
+        $this->_table = is_string($table) ? $table : strval($table);
+
+        return $this;
     }
 
     public function from($table, $singleTable = true) {
-        
+        $this->_table = is_string($table) ? $table : strval($table);
+
+        return $this;
+    }
+
+    public function __toString() {
+        switch ($this->_queryAction) {
+            case 'SELECT': return $this->_adapterInstance->parseSelect($this->_preBuilder); break;
+            case 'UPDATE': return $this->_adapterInstance->parseUpdate($this->_preBuilder); break;
+            case 'INSERT': return $this->_adapterInstance->parseInsert($this->_preBuilder); break;
+            case 'DELETE': return $this->_adapterInstance->parseDelete($this->_preBuilder); break;
+            default: throw new \Exception('SDB: Query: unknown query action or undefined action', 1996);
+        }
     }
 }
-
-?>

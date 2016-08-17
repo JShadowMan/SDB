@@ -53,9 +53,8 @@ class Helper {
      * @param string $tablePrefix
      */
     public function __construct($tablePrefix, $adapter = null) {
-        if (!in_array($adapter, array(self::ADAPTER_MYSQL, 
-                self::ADAPTER_ORACLE, self::ADAPTER_SQL_SERVER, self::ADAPTER_SQLITE))) {
-            throw new \Exception('SDB: adapter not found', 1996);
+        if (!in_array($adapter, array_values(self::$_driver))) {
+            throw new \Exception('SDB: adapter or driver invalid', 1996);
         }
 
         if (!is_string($tablePrefix)) {
@@ -108,6 +107,9 @@ class Helper {
             }
             return $value;
         }, func_get_args());
+        if (count($args) == 5) {
+            $args[] = $charset;
+        }
 
         self::$_server[] = array_merge($args, array( '__connectable__' => false ));
     }
@@ -118,20 +120,13 @@ class Helper {
      * 
      * @throws \Exception
      */
-    private static function initDriver($raise = true) {
+    private static function initDriver() {
         $loaded = get_loaded_extensions();
 
         if (in_array('PDO', $loaded) && extension_loaded('PDO')) {
             $filtered = array_filter($loaded, function($value) {
-                return strpos($value, 'pdo_') === 0;
+                return strpos($value, 'pdo_') === 0 || in_array($value, array('mysqli', 'oci'));
             });
-
-            # PDO module support is not enabled, check mysql, oracle and more
-            if (empty($filtered)) {
-                $filtered = array_filter($loaded, function($value) {
-                    return in_array($value, array('mysqli', 'oci'));
-                });
-            }
 
             # Database module support is not enabled. raise Exception
             if (empty($filtered)) {
@@ -141,15 +136,15 @@ class Helper {
             # Create driver => adapter mapping
             foreach ($filtered as $driver) {
                 switch ($driver) {
-                    case 'pdo_mysql':
-                    case 'mysqli':    self::$_driver[$driver] = self::ADAPTER_MYSQL;  break;
-                    case 'pdo_oci':
-                    case 'oci':       self::$_driver[$driver] = self::ADAPTER_ORACLE; break;
-                    case 'pgsql':
-                    case 'pdo_pgsql': self::$_driver[$driver] = self::ADAPTER_PGSQL;  break;
-                    case 'sqlite':
+                    case 'pdo_mysql' : self::$_driver[$driver] = self::ADAPTER_PDO_MYSQL;  break;
+                    case 'mysqli'    : self::$_driver[$driver] = self::ADAPTER_MYSQL;      break;
+                    case 'pdo_oci'   : self::$_driver[$driver] = self::ADAPTER_PDO_ORACLE; break;
+                    case 'oci'       : self::$_driver[$driver] = self::ADAPTER_ORACLE;     break;
+                    case 'pgsql'     :
+                    case 'pdo_pgsql' : self::$_driver[$driver] = self::ADAPTER_PGSQL;  break;
+                    case 'sqlite'    :
                     case 'pdo_sqlite': self::$_driver[$driver] = self::ADAPTER_SQLITE;  break;
-                    default: if ($raise === true) {
+                    default: if (self::$_adapterStrictMode === true) {
                         throw new \Exception("SDB: fatal error, driver({$driver}) invalid.\n" . serialize($filtered), 1996);
                     }
                 }
@@ -166,42 +161,71 @@ class Helper {
         return new Query($this->_adapter);
     }
 
+    /**
+     * SQL Basic Syntax: SELECT
+     */
     public function select() {
         return $this->builder()->select(func_get_args());
     }
 
+    /**
+     * SQL Basic Syntax: UPDATE
+     *
+     * @param string $table
+     */
     public function update($table) {
-        $this->_table = $table;
         return $this->builder()->update($table);
     }
 
+    /**
+     * SQL Basic Syntax: INSERT
+     *
+     * @param string $table
+     */
     public function insert($table) {
-        
+        return $this->builder()->insert($table);
     }
 
+    /**
+     * SQL Basic Syntax: DELETE
+     *
+     * @param string $table
+     */
     public function delete($table) {
-        
+        return $this->builder()->delete($table);
     }
 
-    public function query() {
-        
+    /**
+     * execute query
+     * 
+     * @param string|SDB\Query $table
+     */
+    public function query($query) {
+        $query = trim($query instanceof Query ? $query->__toString() : $query);
+
+        call_user_func_array(array($this->_adapter, 'connect'), self::$_server[array_rand(self::$_server, 1)]);
+        return $this->_adapter->query($query);
     }
 
     public function prepare() {
         
     }
 
-    public function functions($function, $args) {
+    public function functions($function, $args = null) {
         
     }
 
     # Database: MySQL
+    const ADAPTER_PDO_MYSQL  = 'PDO_MySQL';
+
     const ADAPTER_MYSQL      = 'MySQL';
 
     # Database: SQL Server
     const ADAPTER_SQL_SERVER = 'SQL_SERVER';
 
     # Database: Oracle
+    const ADAPTER_PDO_ORACLE = 'PDO_ORACLE';
+
     const ADAPTER_ORACLE     = 'ORACLE';
 
     # Database: SQLite
@@ -224,5 +248,3 @@ class Helper {
     # Operator: Change
     const OPERATOR_CHANGE    = 'CHANGE';
 }
-
-?>
