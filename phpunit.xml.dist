@@ -10,7 +10,7 @@
          bootstrap="tests/Bootstrap.php"
          >
     <testsuites>
-        <testsuite name="Db Test Suite">
+        <testsuite name="SDB Test Suite">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
