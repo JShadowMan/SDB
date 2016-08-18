@@ -91,7 +91,7 @@ class MySQL extends Adapter {
     public function parseSelect($preBuilder) {
         
     }
-    
+
     /**
      * based preBuilder generate UPDATE syntax
      *
@@ -101,7 +101,7 @@ class MySQL extends Adapter {
     public function parseUpdate($preBuilder) {
         
     }
-    
+
     /**
      * based preBuilder generate INSERT syntax
      *
@@ -111,7 +111,7 @@ class MySQL extends Adapter {
     public function parseInsert($preBuilder) {
         
     }
-    
+
     /**
      * based preBuilder generate DELETE syntax
      *

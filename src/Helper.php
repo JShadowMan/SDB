@@ -218,6 +218,7 @@ class Helper {
     # Database: MySQL
     const ADAPTER_PDO_MYSQL  = 'PDO_MySQL';
 
+    # Database: MySQL, PDO
     const ADAPTER_MYSQL      = 'MySQL';
 
     # Database: SQL Server
@@ -226,6 +227,7 @@ class Helper {
     # Database: Oracle
     const ADAPTER_PDO_ORACLE = 'PDO_ORACLE';
 
+    # Database: Oracle, PDO
     const ADAPTER_ORACLE     = 'ORACLE';
 
     # Database: SQLite
@@ -247,4 +249,28 @@ class Helper {
 
     # Operator: Change
     const OPERATOR_CHANGE    = 'CHANGE';
+
+    # Data Type: DEFAULT
+    const DATA_DEFAULT       = array('\x44\x45\x46\x41\x55\x4C\x54');
+
+    #Data Type: NULL
+    const DATA_NULL          = array('\x4E\x55\x4C\x4C');
+
+    # Sort Type: DESC
+    const ORDER_DESC         = 'DESC';
+
+    # Sort Type: ASC
+    const ORDER_ASC          = 'ASC';
+
+    # Conjunction: AND
+    const CONJUNCTION_AND    = 'AND';
+
+    # Conjunction: OR
+    const CONJUNCTION_OR     = 'OR';
+
+    const JOIN_INNER         = 'INNER JOIN';
+
+    const JOIN_LEFT          = 'LEFT JOIN';
+
+    const JOIN_RIGHT          = 'RIGHT JOIN';
 }
