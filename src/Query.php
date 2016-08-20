@@ -186,7 +186,7 @@ class Query {
 
             foreach ($row as &$val) {
                 if ($val === Helper::DATA_DEFAULT || $val === Helper::DATA_NULL) {
-                    $val = stripcslashes(current($val));
+                    $val = stripcslashes($val);
                     continue;
                 }
                 $val = $this->_adapterInstance->quoteValue($val);
@@ -197,12 +197,12 @@ class Query {
         return $this;
     }
 
-    public function order($field, $sort = Helper::SORT_ASC) {
-        if (!is_string($field) || !in_array($sort, array(Helper::SORT_DESC, Helper::SORT_ASC))) {
+    public function order($field, $sort = Helper::ORDER_ASC) {
+        if (!is_string($field) || !in_array($sort, array(Helper::ORDER_DESC, Helper::ORDER_ASC))) {
             throw new \Exception('SDB: Query: in ORDER params invalid', 1996);
         }
 
-        $this->_preBuilder['order'][] = array('field' => $this->_adapterInstance->quoteKey($field), 'sort' => $sort);
+        $this->_preBuilder['order'][] = array('field' => $this->_adapterInstance->tableFilter($field), 'sort' => $sort);
         return $this;
     }
 
@@ -219,12 +219,12 @@ class Query {
         return $this;
     }
 
-    public function group($field, $sort = Helper::SORT_ASC) {
-        if (!is_string($field) || !in_array($sort, array(Helper::SORT_DESC, Helper::SORT_ASC))) {
+    public function group($field, $sort = Helper::ORDER_ASC) {
+        if (!is_string($field) || !in_array($sort, array(Helper::ORDER_DESC, Helper::ORDER_ASC))) {
             throw new \Exception('SDB: Query: in GROUP params invalid', 1996);
         }
 
-        $this->_preBuilder['group'][] = array('field' => $this->_adapterInstance->quoteKey($field), 'sort' => $sort);
+        $this->_preBuilder['group'][] = array('field' => $this->_adapterInstance->tableFilter($field), 'sort' => $sort);
         return $this;
     }
 
@@ -255,6 +255,7 @@ class Query {
 
         $lval = explode('.', $expression->lval(array($this->_adapterInstance, 'tableFilter')));
         $rval = explode('.', $expression->rval(array($this->_adapterInstance, 'tableFilter')));
+        var_dump($rval);
         $references = array(
             'lval' => array('table' => $lval[0], 'field' => $lval[1]),
             'rval' => array('table' => $rval[0], 'field' => $rval[1])
@@ -279,10 +280,10 @@ class Query {
 
     public function __toString() {
         switch ($this->_queryAction) {
-            case 'SELECT': return $this->_adapterInstance->parseSelect($this->_preBuilder); break;
-            case 'UPDATE': return $this->_adapterInstance->parseUpdate($this->_preBuilder); break;
-            case 'INSERT': return $this->_adapterInstance->parseInsert($this->_preBuilder); break;
-            case 'DELETE': return $this->_adapterInstance->parseDelete($this->_preBuilder); break;
+            case 'SELECT': return $this->_adapterInstance->parseSelect($this->_preBuilder, $this->_table); break;
+            case 'UPDATE': return $this->_adapterInstance->parseUpdate($this->_preBuilder, $this->_table); break;
+            case 'INSERT': return $this->_adapterInstance->parseInsert($this->_preBuilder, $this->_table); break;
+            case 'DELETE': return $this->_adapterInstance->parseDelete($this->_preBuilder, $this->_table); break;
             default: throw new \Exception('SDB: Query: unknown query action or undefined action', 1996);
         }
     }

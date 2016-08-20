@@ -46,6 +46,8 @@ class Helper {
      */
     private $_tablePrefix = null;
 
+    private $_preQueryPool = array();
+
     /**
      * Helper constructor
      * 
@@ -203,11 +205,20 @@ class Helper {
     public function query($query) {
         $query = trim($query instanceof Query ? $query->__toString() : $query);
 
+        var_dump($query);
         call_user_func_array(array($this->_adapter, 'connect'), self::$_server[array_rand(self::$_server, 1)]);
         return $this->_adapter->query($query);
     }
 
+    public function preQuery($alias, $query) {
+        
+    }
+
     public function prepare() {
+        
+    }
+
+    public function params() {
         
     }
 
@@ -251,10 +262,10 @@ class Helper {
     const OPERATOR_CHANGE    = 'CHANGE';
 
     # Data Type: DEFAULT
-    const DATA_DEFAULT       = array('\x44\x45\x46\x41\x55\x4C\x54');
+    const DATA_DEFAULT       = '\x44\x45\x46\x41\x55\x4C\x54';
 
     #Data Type: NULL
-    const DATA_NULL          = array('\x4E\x55\x4C\x4C');
+    const DATA_NULL          = '\x4E\x55\x4C\x4C';
 
     # Sort Type: DESC
     const ORDER_DESC         = 'DESC';

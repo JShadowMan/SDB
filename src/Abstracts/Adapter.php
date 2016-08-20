@@ -56,7 +56,7 @@ abstract class Adapter {
      * @param array $preBuilder
      * @return string
      */
-    abstract public function parseSelect($preBuilder);
+    abstract public function parseSelect($preBuilder, $table);
 
     /**
      * based preBuilder generate UPDATE syntax
@@ -64,7 +64,7 @@ abstract class Adapter {
      * @param string $preBuilder
      * @return string
      */
-    abstract public function parseUpdate($preBuilder);
+    abstract public function parseUpdate($preBuilder, $table);
 
     /**
      * based preBuilder generate INSERT syntax
@@ -72,7 +72,7 @@ abstract class Adapter {
      * @param string $preBuilder
      * @return string
      */
-    abstract public function parseInsert($preBuilder);
+    abstract public function parseInsert($preBuilder, $table);
 
     /**
      * based preBuilder generate DELETE syntax
@@ -80,7 +80,7 @@ abstract class Adapter {
      * @param string $preBuilder
      * @return string
      */
-    abstract public function parseDelete($preBuilder);
+    abstract public function parseDelete($preBuilder, $table);
 
     /**
      * quoted identifiers

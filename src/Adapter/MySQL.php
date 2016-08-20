@@ -88,8 +88,80 @@ class MySQL extends Adapter {
      * @param array $preBuilder
      * @return string
      */
-    public function parseSelect($preBuilder) {
-        
+    public function parseSelect($preBuilder, $table) {
+        $sql = 'SELECT ';
+        $sql .= implode(', ', $this->parseField($preBuilder['fields']));
+        $sql .= ' FROM ' . $table;
+
+        # JOIN
+        if (!empty($preBuilder['join'])) {
+            foreach ($preBuilder['join'] as $row) {
+                $sql .= " {$row['references']} ( " . implode(', ', $row['tables']) . " )";
+            }
+        }
+
+        # ON
+        if (!empty($preBuilder['on'])) {
+            $sql .= " ON ( " . self::parseON($preBuilder['on']) . " )";
+        }
+
+        # WHERE
+        if (!empty($preBuilder['where'])) {
+            $sql .= ' WHERE ';
+            foreach ($preBuilder['where'] as $row) {
+                $sql .= "{$row['lval']} {$row['operator']} {$row['rval']} {$row['conjunction']} ";
+            }
+
+            if ($sql[strlen($sql) - 2] == 'R') {
+                $sql = substr($sql, 0, strlen($sql) - 4);
+            } else {
+                $sql = substr($sql, 0, strlen($sql) - 5);
+            }
+        }
+
+        # GROUP
+        if (!empty($preBuilder['group'])) {
+            $sql .= ' GROUP BY ';
+            foreach ($preBuilder['group'] as $row) {
+                $sql .= "{$row['field']} {$row['sort']}, ";
+            }
+            $sql = substr($sql, 0, strlen($sql) - 2);
+        }
+
+        # HAVING
+        if (!empty($preBuilder['having'])) {
+            $sql .= ' HAVING ';
+            foreach ($preBuilder['having'] as $row) {
+                $sql .= "{$row['lval']} {$row['operator']} {$row['rval']} {$row['conjunction']} ";
+            }
+
+            if ($sql[strlen($sql) - 2] == 'R') { # $conjunction = OR
+                $sql = substr($sql, 0, strlen($sql) - 4);
+            } else { # $conjunction = AND
+                $sql = substr($sql, 0, strlen($sql) - 5);
+            }
+        }
+
+        # ORDER
+        if (!empty($preBuilder['order'])) {
+            $sql .= ' ORDER BY ';
+            foreach ($preBuilder['order'] as $row) {
+                $sql .= "{$row['field']} {$row['sort']}, ";
+            }
+            $sql = substr($sql, 0, strlen($sql) - 2);
+        }
+
+        # LIMIT
+        if ($preBuilder['limit'] != null) {
+            $sql .= " LIMIT {$preBuilder['limit']}";
+        }
+
+        # OFFSET
+        if ($preBuilder['offset'] != null) {
+            $sql .= " OFFSET {$preBuilder['offset']}";
+        }
+
+        return $sql;
     }
 
     /**
@@ -98,7 +170,7 @@ class MySQL extends Adapter {
      * @param string $preBuilder
      * @return string
     */
-    public function parseUpdate($preBuilder) {
+    public function parseUpdate($preBuilder, $table) {
         
     }
 
@@ -108,7 +180,7 @@ class MySQL extends Adapter {
      * @param string $preBuilder
      * @return string
     */
-    public function parseInsert($preBuilder) {
+    public function parseInsert($preBuilder, $table) {
         
     }
 
@@ -118,7 +190,7 @@ class MySQL extends Adapter {
      * @param string $preBuilder
      * @return string
     */
-    public function parseDelete($preBuilder) {
+    public function parseDelete($preBuilder, $table) {
         
     }
 
@@ -177,7 +249,7 @@ class MySQL extends Adapter {
             $result = $this->_instance->query($query);
 
             if ($this->_instance->errno !== 0) {
-                throw new \Exception("SDB: MySQL: {$this->_instance->connect_errno}: {$this->_instance->connect_error}", 1996);
+                throw new \Exception("SDB: MySQL: {$this->_instance->errno}: {$this->_instance->error}", 1996);
             }
 
             if ($result instanceof \mysqli_result) {
@@ -192,6 +264,8 @@ class MySQL extends Adapter {
                 $result->free();
             }
         }
+
+        return true;
     }
 
     /**
@@ -244,5 +318,29 @@ class MySQL extends Adapter {
         }
 
         return empty($stack) && $pushFlags;
+    }
+
+    private function parseField(array $fields) {
+        foreach ($fields as &$field) {
+            if (is_array($field)) {
+                $field = $field[0] . " AS " . $field[1];
+            }
+        }
+
+        return $fields;
+    }
+
+    private function parseON($references) {
+        $on = "";
+
+        foreach ($references as $row) {
+            $on .= "{$row['lval']['table']}.{$row['lval']['field']} {$row['operator']} {$row['rval']['table']}.{$row['rval']['field']} {$row['conjunction']} ";
+        }
+        if ($on[strlen($on) - 2] == 'R') { // OR
+            $on = substr($on, 0, strlen($on) - 4);
+        } else {
+            $on = substr($on, 0, strlen($on) - 5);
+        }
+        return $on;
     }
 }

@@ -12,7 +12,7 @@ if (function_exists('spl_autoload_register')) {
 
 Helper::server('127.0.0.1', 3306, 'root', 'root', 'here');
 
-$helper = new Helper('here_', Helper::ADAPTER_PDO_MYSQL);
+$helper = new Helper('here_', Helper::ADAPTER_MYSQL);
 
 echo "<pre>";
 
@@ -28,14 +28,15 @@ echo "<pre>";
 //         )->page(11, 10)
 //);
 
-print_r($helper->select()->from('table.options')
-        ->where(Expression::equal('for', '0'))
-        ->join(array('table.user', 'table.articles'))
-        ->on(Expression::equal('table.options.for', 'table.user.uid'))
+$helper->query($helper->select()->from('table.options')
+        ->where(Expression::equal('table.options.for', '0'))
+        ->group('table.options.for')
+        ->order('table.options.for', Helper::ORDER_DESC)
+        ->order('table.options.name')
+        ->join(array('table.users', 'table.articles'))
+        ->on(Expression::equal('table.options.for', 'table.users.uid'))
         ->on(Expression::equal('table.options.for', 'table.articles.pid'))
-        ->join('table.comment', Helper::JOIN_LEFT)
-        ->on(Expression::equal('table.comment.pid', 'table.articles.pid'))
-        ->having(Expression::equal('table.user.uid', 0, 'si'))
+        ->having(Expression::equal('table.users.uid', 0))
 );
 
 echo "</pre>";
