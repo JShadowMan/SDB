@@ -6,6 +6,7 @@
 namespace SDB\Adapter;
 
 use SDB\Abstracts\Adapter;
+use SDB\Query;
 
 class MySQL extends Adapter {
     /**
@@ -171,7 +172,45 @@ class MySQL extends Adapter {
      * @return string
     */
     public function parseUpdate($preBuilder, $table) {
-        
+        $sql = 'UPDATE ';
+        $sql .= $table;
+
+        $sql .= ' SET ';
+        foreach ($preBuilder['set'] as $key => $value) {
+            $sql .= "{$key} = {$value}, ";
+        }
+        $sql = substr($sql, 0, strlen($sql) - 2);
+
+        if (!empty($preBuilder['where'])) {
+            $sql .= ' WHERE ';
+            foreach ($preBuilder['where'] as $row) {
+                $sql .= "{$row['lval']} {$row['operator']} {$row['rval']} {$row['conjunction']} ";
+            }
+
+            if ($sql[strlen($sql) - 2] == 'R') {
+                $sql = substr($sql, 0, strlen($sql) - 4);
+            } else {
+                $sql = substr($sql, 0, strlen($sql) - 5);
+            }
+        }
+
+        if (!empty($preBuilder['order'])) {
+            $sql .= ' ORDER BY ';
+            foreach ($preBuilder['order'] as $row) {
+                $sql .= "{$row['field']} {$row['sort']}, ";
+            }
+            $sql = substr($sql, 0, strlen($sql) - 2);
+        }
+
+        if ($preBuilder['limit'] != null) {
+            $sql .= " LIMIT {$preBuilder['limit']}";
+        }
+
+        if ($preBuilder['offset'] != null) {
+            $sql .= " OFFSET {$preBuilder['offset']}";
+        }
+
+        return $sql;
     }
 
     /**
@@ -181,7 +220,30 @@ class MySQL extends Adapter {
      * @return string
     */
     public function parseInsert($preBuilder, $table) {
-        
+        $sql = 'INSERT INTO ';
+        $sql .= $table;
+
+        if (!empty($preBuilder['rows']['keys'])) {
+            $sql .= ' ( ' . implode(', ', array_values($preBuilder['rows']['keys'])) . ' ) ';
+        }
+
+        if ($preBuilder['insertSelect'] instanceof Query) {
+            $sql .= call_user_func(array($preBuilder['insertSelect'], '__toString'));
+
+            return $sql;
+        }
+
+        $sql .= 'VALUES ';
+        if (empty(($preBuilder['rows']['values']))) {
+            return null;
+        } else {
+            foreach ($preBuilder['rows']['values'] as $row) {
+                $sql .= '( ' . implode(', ', array_values($row)) . ' ), ';
+            }
+        }
+        $sql = substr($sql, 0, strlen($sql) - 2); // Remove unnecessary ', '
+
+        return $sql;
     }
 
     /**
@@ -191,7 +253,57 @@ class MySQL extends Adapter {
      * @return string
     */
     public function parseDelete($preBuilder, $table) {
-        
+        $sql = 'DELETE FROM ';
+        $sql .= is_array($table) ? implode(', ', $table) : $table;
+
+        if (is_array($table)) {
+            if ($preBuilder['using'] == null) {
+                throw new \Exception('SDB: MySQL: syntax error for multi-table delete', 1996);
+            } else {
+                $sql .= ' USING ' . $preBuilder['using'];
+            }
+        }
+
+        if (!empty($preBuilder['join'])) {
+            foreach ($preBuilder['join'] as $row) {
+                $sql .= " {$row['references']} ( " . implode(', ', $row['tables']) . " )";
+            }
+        }
+
+        if (!empty($preBuilder['on'])) {
+            $sql .= " ON ( " . self::parseON($preBuilder['on']) . " )";
+        }
+
+        if (!empty($preBuilder['where'])) {
+            $sql .= ' WHERE ';
+            foreach ($preBuilder['where'] as $row) {
+                $sql .= "{$row['lval']} {$row['operator']} {$row['rval']} {$row['conjunction']} ";
+            }
+
+            if ($sql[strlen($sql) - 2] == 'R') {
+                $sql = substr($sql, 0, strlen($sql) - 4);
+            } else {
+                $sql = substr($sql, 0, strlen($sql) - 5);
+            }
+        }
+
+        if (!empty($preBuilder['order'])) {
+            $sql .= ' ORDER BY ';
+            foreach ($preBuilder['order'] as $row) {
+                $sql .= "{$row['field']} {$row['sort']}, ";
+            }
+            $sql = substr($sql, 0, strlen($sql) - 2);
+        }
+
+        if ($preBuilder['limit'] != null) {
+            $sql .= " LIMIT {$preBuilder['limit']}";
+        }
+
+        if ($preBuilder['offset'] != null) {
+            $sql .= " OFFSET {$preBuilder['offset']}";
+        }
+
+        return $sql;
     }
 
     /**
@@ -272,20 +384,22 @@ class MySQL extends Adapter {
      * fetch last query data
      *
      * @param array $keys
-     * @return object
-     */
-    public function fetchObject(array $keys = array()) {
-        
-    }
-
-    /**
-     * fetch last query data
-     *
-     * @param array $keys
      * @return array
      */
-    public function fetchAssoc(array $keys = array()) {
-        
+    public function fetchAssoc($keys = null) {
+        if (is_array($keys)) {
+            $values = array();
+
+            foreach ($keys as $key) {
+                $values[] = isset($this->_result[$this->_resultCurrentIndex][$key]) ? $this->_result[$this->_resultCurrentIndex][$key] : null;
+            }
+            $this->_resultCurrentIndex += 1;
+            return $values;
+        } else if (is_string($keys)) {
+            return isset($this->_result[$this->_resultCurrentIndex][$keys]) ? $this->_result[$this->_resultCurrentIndex++][$keys] : null;
+        } else {
+            return $this->_result[$this->_resultCurrentIndex++];
+        }
     }
 
     /**
@@ -294,7 +408,7 @@ class MySQL extends Adapter {
      * @return array
      */
     public function fetchAll() {
-        
+        return $this->_result;
     }
 
     private function bracketsMatcher($string) {

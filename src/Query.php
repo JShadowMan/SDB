@@ -23,8 +23,11 @@ class Query {
         'join'   => array(),
         'on'     => array(),
         'having' => array(),
+        'set'    => array(),
+        'using'  => null,
         'limit'  => null,
-        'offset' => null
+        'offset' => null,
+        'insertSelect' => null
     );
 
     /**
@@ -109,14 +112,26 @@ class Query {
         return $this;
     }
 
+    public function insertSelect($query) {
+        if (!($query instanceof Query)) {
+            throw new \Exception('SDB: Query: insertSelect params invalid', 1996);
+        }
+        $this->_preBuilder['insertSelect'] = $query;
+
+        return $this;
+    }
+
     /**
      * SQL Basic Syntax: DELETE
      *
      * @param string $table
      */
-    public function delete($table) {
+    public function delete($tables, $using = null) {
         $this->_queryAction = 'DELETE';
-        $this->_table = $this->_adapterInstance->tableFilter(is_string($table) ? $table : strval($table));
+        $this->_table = is_string($tables) ? $tables :
+                ((is_array($tables) ? (array_map(function($t) { return $this->_adapterInstance->tableFilter($t); }, $tables)) :
+                        strval($tables)));
+        $this->_preBuilder['using'] = $this->_adapterInstance->tableFilter(strval($using));
 
         return $this;
     }
@@ -255,7 +270,6 @@ class Query {
 
         $lval = explode('.', $expression->lval(array($this->_adapterInstance, 'tableFilter')));
         $rval = explode('.', $expression->rval(array($this->_adapterInstance, 'tableFilter')));
-        var_dump($rval);
         $references = array(
             'lval' => array('table' => $lval[0], 'field' => $lval[1]),
             'rval' => array('table' => $rval[0], 'field' => $rval[1])
@@ -275,6 +289,24 @@ class Query {
 
         $this->_preBuilder['having'][] = array_merge(array( 'conjunction' => $conjunction),
                 $expression->expression(array($this->_adapterInstance, 'tableFilter'), array($this->_adapterInstance, 'quoteValue')));
+        return $this;
+    }
+
+    public function set(array $kvps) {
+        foreach ($kvps as $key => $value) {
+            if (!is_string($key)) {
+                throw new \Exception('SDB: Query: set params invalid', 1996);
+            }
+
+            if (in_array($value, array(Helper::DATA_DEFAULT, Helper::DATA_NULL))) {
+                $this->_preBuilder['set'] = array_merge($this->_preBuilder['set'], 
+                        array($this->_adapterInstance->quoteKey($key) => stripcslashes($value)));
+            } else {
+                $this->_preBuilder['set'] = array_merge($this->_preBuilder['set'],
+                        array($this->_adapterInstance->quoteKey($key) => $this->_adapterInstance->quoteValue($value)));
+            }
+        }
+
         return $this;
     }
 

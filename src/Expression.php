@@ -139,8 +139,9 @@ class Expression {
         array_shift($args);
 
         if (is_string($variableType) && count($args) === strlen($variableType)) {
+            $index = 0;
             foreach ($args as &$variable) {
-                $variable = self::checkType($variable, $variableType[current(array_keys($args, $variable))]);
+                $variable = self::checkType($variable, $variableType[$index++]);
             }
         } else {
             throw new \Exception('SDB: Expression: params not matched', 1996);

@@ -122,17 +122,9 @@ abstract class Adapter {
      * fetch last query data
      * 
      * @param array $keys
-     * @return object
-     */
-    abstract public function fetchObject(array $keys = array());
-
-    /**
-     * fetch last query data
-     * 
-     * @param array $keys
      * @return array
      */
-    abstract public function fetchAssoc(array $keys = array());
+    abstract public function fetchAssoc($keys = null);
 
     /**
      * fetch last query data

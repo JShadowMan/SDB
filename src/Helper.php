@@ -193,8 +193,8 @@ class Helper {
      *
      * @param string $table
      */
-    public function delete($table) {
-        return $this->builder()->delete($table);
+    public function delete($tables, $using = null) {
+        return $this->builder()->delete($tables, $using);
     }
 
     /**
@@ -205,7 +205,6 @@ class Helper {
     public function query($query) {
         $query = trim($query instanceof Query ? $query->__toString() : $query);
 
-        var_dump($query);
         call_user_func_array(array($this->_adapter, 'connect'), self::$_server[array_rand(self::$_server, 1)]);
         return $this->_adapter->query($query);
     }
@@ -224,6 +223,14 @@ class Helper {
 
     public function functions($function, $args = null) {
         
+    }
+
+    public function fetchAssoc($keys = null) {
+        return $this->_adapter->fetchAssoc($keys);
+    }
+
+    public function fetchAll() {
+        return $this->_adapter->fetchAll();
     }
 
     # Database: MySQL
