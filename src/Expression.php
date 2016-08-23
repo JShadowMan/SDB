@@ -11,7 +11,7 @@ class Expression {
         'ne'  => '!=',
         'gt'  => '>',
         'gte' => '>=',
-        'lt'  => '<', 
+        'lt'  => '<',
         'lte' => '<='
     );
 
@@ -44,7 +44,7 @@ class Expression {
         if (is_callable($callback)) {
             return call_user_func($callback, $this->_expression['rval']);
         }
-    
+
         return $this->_expression['rval'];
     }
 
@@ -53,7 +53,7 @@ class Expression {
     }
 
     public static function symbol($e = '=', $ne = '!=', $gt = '>', $gte = '>=', $lt = '<', $lte = '<=') {
-        self::$_symbol = func_get_args();
+        return self::$_symbol = get_defined_vars();
     }
 
     /**
