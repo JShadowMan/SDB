@@ -44,7 +44,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testAddServer() {
-        Helper::server('127.0.0.1', 3306, 'root', 'root', 'here');
+        Helper::server('127.0.0.1', 3306, 'root', '', 'test');
     }
 
     public function testBuilderReturnType() {
