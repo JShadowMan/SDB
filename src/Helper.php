@@ -55,22 +55,22 @@ class Helper {
      * @param string $tablePrefix
      */
     public function __construct($tablePrefix, $adapter = null) {
-        if (!in_array($adapter, array_values(self::$_driver))) {
-            throw new \Exception('SDB: adapter or driver invalid', 1996);
-        }
-
         if (!is_string($tablePrefix)) {
             throw new \Exception('SDB: table prefix except string', 1996);
         }
         $this->_tablePrefix = $tablePrefix;
 
         # default using mysql, if mysql is disable, that using first database adapter
-        if ($adapter === null) {
+        if ($adapter == null) {
             if (in_array(self::ADAPTER_MYSQL, self::$_driver)) {
                 $adapter = self::ADAPTER_MYSQL;
             } else {
-                $adapter = current(self::$_driver);
+                throw new \Exception('SDB: Default Database adapter not found', 1996);
             }
+        }
+
+        if (!in_array($adapter, array_values(self::$_driver))) {
+            throw new \Exception('SDB: adapter or driver invalid', 1996);
         }
 
         # if adapter avaliable, creating the instance
@@ -108,10 +108,7 @@ class Helper {
                 return strval($value);
             }
             return $value;
-        }, func_get_args());
-        if (count($args) == 5) {
-            $args[] = $charset;
-        }
+        }, get_defined_vars());
 
         self::$_server[] = array_merge($args, array( '__connectable__' => false ));
     }
@@ -138,16 +135,16 @@ class Helper {
             # Create driver => adapter mapping
             foreach ($filtered as $driver) {
                 switch ($driver) {
-                    case 'pdo_mysql' : self::$_driver[$driver] = self::ADAPTER_PDO_MYSQL;  break;
-                    case 'mysqli'    : self::$_driver[$driver] = self::ADAPTER_MYSQL;      break;
-                    case 'pdo_oci'   : self::$_driver[$driver] = self::ADAPTER_PDO_ORACLE; break;
-                    case 'oci'       : self::$_driver[$driver] = self::ADAPTER_ORACLE;     break;
-                    case 'pgsql'     :
-                    case 'pdo_pgsql' : self::$_driver[$driver] = self::ADAPTER_PGSQL;  break;
-                    case 'sqlite'    :
-                    case 'pdo_sqlite': self::$_driver[$driver] = self::ADAPTER_SQLITE;  break;
+                    case 'pdo_mysql'  : self::$_driver[$driver] = self::ADAPTER_PDO_MYSQL;  break;
+                    case 'mysqli'     : self::$_driver[$driver] = self::ADAPTER_MYSQL;      break;
+                    case 'pdo_oci'    : self::$_driver[$driver] = self::ADAPTER_PDO_ORACLE; break;
+                    case 'oci'        : self::$_driver[$driver] = self::ADAPTER_ORACLE;     break;
+                    case 'pgsql'      : self::$_driver[$driver] = self::ADAPTER_PGSQL;      break;
+                    case 'pdo_pgsql'  : self::$_driver[$driver] = self::ADAPTER_PDO_PGSQL;  break;
+                    case 'sqlite'     : self::$_driver[$driver] = self::ADAPTER_SQLITE;     break;
+                    case 'pdo_sqlite' : self::$_driver[$driver] = self::ADAPTER_SQLITE;     break;
                     default: if (self::$_adapterStrictMode === true) {
-                        throw new \Exception("SDB: fatal error, driver({$driver}) invalid.\n" . serialize($filtered), 1996);
+                        throw new \Exception("SDB: fatal error, driver({$driver}) invalid.\n", 1996);
                     }
                 }
             }
@@ -209,21 +206,21 @@ class Helper {
         return $this->_adapter->query($query);
     }
 
-    public function preQuery($alias, $query) {
+//     public function preQuery($alias, $query) {
         
-    }
+//     }
 
-    public function prepare() {
+//     public function prepare() {
         
-    }
+//     }
 
-    public function params() {
+//     public function params() {
         
-    }
+//     }
 
-    public function functions($function, $args = null) {
+//     public function functions($function, $args = null) {
         
-    }
+//     }
 
     public function fetchAssoc($keys = null) {
         return $this->_adapter->fetchAssoc($keys);
@@ -251,7 +248,11 @@ class Helper {
     # Database: SQLite
     const ADAPTER_SQLITE     = 'SQLITE';
 
+    # Database: PostgreSQL
     const ADAPTER_PGSQL      = 'PGSQL';
+
+    # Database: PostgreSQL, PDO
+    const ADAPTER_PDO_PGSQL  = 'PDO_PGSQL';
 
     # CRUD Operator: Insert
     const OPERATOR_INSERT    = 'INSERT';

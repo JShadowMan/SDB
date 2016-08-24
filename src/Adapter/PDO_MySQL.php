@@ -13,6 +13,15 @@ class PDO_MySQL extends MySQL {
     /**
      * PDO Version
      * 
+     * @see \SDB\Adapter\MySQL::avaliable()
+     */
+    public function avaliable() {
+        return extension_loaded('pdo_mysql');
+    }
+
+    /**
+     * PDO Version
+     * 
      * @see \SDB\Adapter\MySQL::connect()
      */
     public function connect($host, $port, $user, $password, $database, $charset = 'utf8') {

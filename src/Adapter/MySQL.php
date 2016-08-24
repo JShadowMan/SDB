@@ -234,7 +234,7 @@ class MySQL extends Adapter {
         }
 
         $sql .= 'VALUES ';
-        if (empty(($preBuilder['rows']['values']))) {
+        if (empty($preBuilder['rows']['values'])) {
             return null;
         } else {
             foreach ($preBuilder['rows']['values'] as $row) {
