@@ -144,6 +144,7 @@ class ExpressionTest extends \PHPUnit_Framework_TestCase {
         $symbols = Expression::symbol('==');
 
         $this->assertEquals(array('e' => '==', 'ne' => '!=', 'gt' => '>', 'gte' => '>=', 'lt' => '<', 'lte' => '<='), $symbols);
+        $symbols = Expression::symbol('=');
     }
 
     public function testGettingDataUsingCallback() {
@@ -162,7 +163,7 @@ class ExpressionTest extends \PHPUnit_Framework_TestCase {
 
     public function testGettingRightValueUsingCallback() {
         $expression = Expression::equal(3, 4, 'ii');
-    
+
         $this->assertEquals(8, $expression->rval(function($v) { return $v + $v; }));
     }
 }

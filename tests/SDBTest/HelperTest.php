@@ -6,6 +6,7 @@
  * @author  ShadowMan
  */
 use SDB\Helper;
+use SDB\Expression;
 
 class HelperTest extends \PHPUnit_Framework_TestCase {
     public function setUp() {
@@ -80,7 +81,12 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     public function testQuery() {
         $instance = new Helper('table_');
 
-        $instance->query('SELECT 1');
+        # Insert Test Data
+        $scripts = file_get_contents('test.sql', true);
+        $scripts = explode(';', $scripts);
+        foreach ($scripts as $script) {
+            $instance->query($script);
+        }
     }
 
     public function testFetchAssoc() {
@@ -95,5 +101,135 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
 
         $instance->query('SELECT 1');
         $this->assertEquals(array(array('1' => '1')), $instance->fetchAll());
+    }
+
+    public function testQuerySimpleSelect() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select()->from('table.users'));
+        foreach ($instance->fetchAll() as $rowId => $row) {
+            if ($rowId == 0) {
+                $this->assertEquals('1', $row['uid']);
+                $this->assertEquals('John', $row['name']);
+                $this->assertEquals('JohnPassword', $row['password']);
+            } else if ($rowId == 1) {
+                $this->assertEquals('2', $row['uid']);
+                $this->assertEquals('Jack', $row['name']);
+                $this->assertEquals('JackPassword', $row['password']);
+            }
+        }
+    }
+
+    public function testQuerySimpleSelectUsingFields() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select('uid', 'name')->from('table.users'));
+        foreach ($instance->fetchAll() as $rowId => $row) {
+            if ($rowId == 0) {
+                $this->assertEquals('1', $row['uid']);
+                $this->assertEquals('John', $row['name']);
+            } else if ($rowId == 1) {
+                $this->assertEquals('2', $row['uid']);
+                $this->assertEquals('Jack', $row['name']);
+            }
+        }
+    }
+
+    public function testQuerySimpleSelectUsingFieldsAlias() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), array('name', 'username'))->from('table.users'));
+        foreach ($instance->fetchAll() as $rowId => $row) {
+            if ($rowId == 0) {
+                $this->assertEquals('1', $row['id']);
+                $this->assertEquals('John', $row['username']);
+            } else if ($rowId == 1) {
+                $this->assertEquals('2', $row['id']);
+                $this->assertEquals('Jack', $row['username']);
+            }
+        }
+    }
+
+    public function testQuerySimpleSelectUsingLimit() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->limit(1));
+
+        $result = $instance->fetchAll();
+        $this->assertEquals(1, count($result));
+
+        $result = $instance->fetchAssoc();
+        $this->assertEquals('1', $result['id']);
+        $this->assertEquals('John', $result['name']);
+    }
+
+    public function testQuerySimpleSelectUsingLimitAndOffset() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->limit(1)->offset(1));
+        $result = $instance->fetchAssoc();
+        $this->assertEquals('2', $result['id']);
+        $this->assertEquals('Jack', $result['name']);
+    }
+
+    public function testQuerySimpleSelectUsingOrderASC() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->order('id')->limit(1));
+
+        $result = $instance->fetchAll();
+        $this->assertEquals(1, count($result));
+
+        $result = $instance->fetchAssoc();
+        $this->assertEquals('1', $result['id']);
+        $this->assertEquals('John', $result['name']);
+    }
+
+    public function testQuerySimpleSelectUsingOrderDESC() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->order('id', Helper::ORDER_DESC)->limit(1));
+        $result = $instance->fetchAssoc();
+        $this->assertEquals('2', $result['id']);
+        $this->assertEquals('Jack', $result['name']);
+    }
+
+    public function testQuerySimpleSelectUsingWhere() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->where(Expression::equal('uid', 2)));
+        $result = $instance->fetchAssoc();
+        $this->assertEquals('2', $result['id']);
+        $this->assertEquals('Jack', $result['name']);
+    }
+
+    public function testQuerySimpleSelectUsingGroup() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group('name'));
+        $result = $instance->fetchAssoc();
+        $this->assertEquals('2', $result['id']);
+        $this->assertEquals('Jack', $result['name']);
+    }
+
+    public function testQuerySimpleSelectUsingGroupAndHaving() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group('name')->having(Expression::smallerThan('uid', 2)));
+        $result = $instance->fetchAssoc();
+        $this->assertEquals('1', $result['id']);
+        $this->assertEquals('John', $result['name']);
+    }
+
+    public function testQuerySimpleSelectUsingJoin() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('table.users.name', 'user'), array('table.options.name', 'option'))->from('table.users')
+                ->join('table.options')
+                ->on(Expression::equal('table.users.uid', 'table.options.for')));
+
+        $result = $instance->fetchAssoc();
+        $this->assertEquals('Jack', $result['user']);
+        $this->assertEquals('JackOptions', $result['option']);
     }
 }
