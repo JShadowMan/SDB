@@ -35,7 +35,7 @@ abstract class Adapter {
     /**
      * return last insert row id
      */
-    abstract public function laseInsertId();
+    abstract public function lastInsertId();
 
     /**
      * return last query affected rows

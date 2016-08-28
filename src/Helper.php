@@ -151,6 +151,10 @@ class Helper {
         }
     }
 
+    public function lastInsertId() {
+        return $this->_adapter->lastInsertId();
+    }
+
     /**
      * return Query instance
      * 

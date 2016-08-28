@@ -58,7 +58,7 @@ class MySQL extends Adapter {
     /**
      * return last insert row id
      */
-    public function laseInsertId() {
+    public function lastInsertId() {
         return $this->_instance->insert_id;
     }
 
@@ -204,10 +204,6 @@ class MySQL extends Adapter {
 
         if ($preBuilder['limit'] != null) {
             $sql .= " LIMIT {$preBuilder['limit']}";
-        }
-
-        if ($preBuilder['offset'] != null) {
-            $sql .= " OFFSET {$preBuilder['offset']}";
         }
 
         return $sql;
