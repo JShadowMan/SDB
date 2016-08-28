@@ -232,4 +232,60 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('Jack', $result['user']);
         $this->assertEquals('JackOptions', $result['option']);
     }
+
+    public function testQuerySimpleInsert() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->insert('table.users')->rows(array(
+            'name'     => 'Lisa',
+            'password' => 'LisaPassword'
+        )));
+        $this->assertEquals(3, $instance->lastInsertId());
+
+        $instance->query($instance->select('uid')->from('table.users'));
+        $this->assertEquals(3, count($instance->fetchAll()));
+    }
+
+    public function testQuerySimpleInsertMultiRows() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->insert('table.options')->keys('name', 'value')->values(
+            array('options1', 'value1'),
+            array('options2', 'value2'),
+            array('options3', 'value3'),
+            array('options4', 'value4')
+        ));
+        $instance->query($instance->select('name')->from('table.options'));
+        $this->assertEquals(6, count($instance->fetchAll()));
+    }
+
+    public function testQueryInsertSelect() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->insert('table.options')->keys('name', 'value')->insertSelect($instance->select('value', 'name')->from('table.options')));
+        $instance->query($instance->select('name')->from('table.options'));
+        $this->assertEquals(12, count($instance->fetchAll()));
+    }
+
+    public function testQuerySimpleUpdate() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->update('table.users')->set(array(
+            'password' => 'newJackPassword'
+        ))->where(Expression::equal('name', 'Jack')));
+
+        $instance->query($instance->select('password')->from('table.users')->where(Expression::equal('name', 'Jack')));
+        $this->assertEquals('newJackPassword', $instance->fetchAssoc('password'));
+    }
+
+    public function testQueryUpdateUsingWhereAndMore() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->update('table.options')->set(array(
+            'for' => '9'
+        ))->where(Expression::equal('for', '0'))->order('name')->limit(5));
+
+        $instance->query($instance->select('name')->from('table.options')->order('name')->where(Expression::equal('table.options.for', '9')));
+        $this->assertEquals(5, count($instance->fetchAll()));
+    }
 }
