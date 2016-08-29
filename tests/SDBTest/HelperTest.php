@@ -44,7 +44,19 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         Helper::disableStrictMode();
     }
 
+    /**
+     * @expectedException Exception
+     */
+    public function testInvalidServer() {
+        Helper::cleanServer();
+        Helper::server('127.0.0.1', 3306, 'invalidUser', '', 'test');
+
+        $instance = new Helper('table_');
+        $instance->connect();
+    }
+
     public function testAddServer() {
+        Helper::cleanServer();
         Helper::server('127.0.0.1', 3306, 'root', '', 'test');
     }
 
@@ -136,6 +148,22 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         }
     }
 
+    /**
+     * @expectedException Exception
+     */
+    public function testInvalidQuery() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select()->from('table.users')->where(Expression::equal('invalidField', 0)));
+    }
+
+    public function testQueryFetchRowByKeys() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select()->from('table.users'));
+        $this->assertEquals('John', $instance->fetchAssoc('name'));
+    }
+
     public function testAffectedRows() {
         $instance = new Helper('table_');
 
@@ -220,7 +248,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     public function testQuerySimpleSelectUsingWhere() {
         $instance = new Helper('table_');
 
-        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->where(Expression::equal('uid', 2)));
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->where(Expression::equal('uid', 2, 'si')));
         $result = $instance->fetchAssoc();
         $this->assertEquals('2', $result['id']);
         $this->assertEquals('Jack', $result['name']);
@@ -333,9 +361,20 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
 
         $instance->query($instance->delete(array('table.articles', 'table.options', 'table.users'), 'table.users')
                 ->join(array('table.options', 'table.articles'))
+                ->on(Expression::equal('table.users.uid', 'table.options.for'), Helper::CONJUNCTION_OR)
+                ->on(Expression::equal('table.users.uid', 'table.articles.parent'))
                 ->where(Expression::equal('table.users.uid', '1'))
         );
 
         $this->assertEquals(9, $instance->affectedRows());
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testQueryInvalidMultiTableDelete() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->delete(array('table.articles', 'table.options', 'table.users')));
     }
 }

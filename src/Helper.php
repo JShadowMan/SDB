@@ -113,6 +113,10 @@ class Helper {
         self::$_server[] = array_merge($args, array( '__connectable__' => false ));
     }
 
+    public static function cleanServer() {
+        return array_splice(self::$_server, 0, count(self::$_server));
+    }
+
     /**
      * private: initialize driver
      * create driver => adapter mapping

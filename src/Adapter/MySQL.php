@@ -15,10 +15,7 @@ class MySQL extends Adapter {
      * @see \SDB\Abstracts\Adapter::avaliable()
      */
     public function avaliable() {
-        return class_exists('mysqli') ? true :
-            (function_exists('mysqli_connect') ? true :
-                (function_exists('mysql_connect') ? true :
-                    false));
+        return class_exists('mysqli') ? true : false;
     }
 
     /**
@@ -349,10 +346,6 @@ class MySQL extends Adapter {
      * @param SDB\Query|string $query
      */
     public function query($query) {
-        if (!($this->_instance instanceof \mysqli)) {
-            throw new \Exception('SDB: MySQL: required connect frist', 1996);
-        }
-
         if (is_string($query) && strlen($query)) {
             $result = $this->_instance->query($query);
 
