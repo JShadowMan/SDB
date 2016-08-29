@@ -89,6 +89,22 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         }
     }
 
+    /**
+     * @expectedException Exception
+     */
+    public function testServerInfoInvalid() {
+        $instance = new Helper('table_');
+
+        $instance->serverInfo();
+    }
+
+    public function testServerInfo() {
+        $instance = new Helper('table_');
+
+        $instance->connect();
+        $instance->serverInfo();
+    }
+
     public function testFetchAssoc() {
         $instance = new Helper('table_');
 
@@ -118,6 +134,13 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
                 $this->assertEquals('JackPassword', $row['password']);
             }
         }
+    }
+
+    public function testAffectedRows() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select()->from('table.options'));
+        $this->assertEquals(2, $instance->affectedRows());
     }
 
     public function testQuerySimpleSelectUsingFields() {
@@ -287,5 +310,32 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
 
         $instance->query($instance->select('name')->from('table.options')->order('name')->where(Expression::equal('table.options.for', '9')));
         $this->assertEquals(5, count($instance->fetchAll()));
+    }
+
+    public function testQueryDelete() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->delete('table.options')->where(Expression::equal('for', '9')));
+        $instance->query($instance->select('name')->from('table.options'));
+        $this->assertEquals(7, count($instance->fetchAll()));
+    }
+
+    public function testQueryDeleteUsingMoreOptions() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->delete('table.options')->order('value')->where(Expression::equal('for', '0'))->limit(1));
+        $instance->query($instance->select('name')->from('table.options'));
+        $this->assertEquals(6, count($instance->fetchAll()));
+    }
+
+    public function testQueryMultiTableDelete() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->delete(array('table.articles', 'table.options', 'table.users'), 'table.users')
+                ->join(array('table.options', 'table.articles'))
+                ->where(Expression::equal('table.users.uid', '1'))
+        );
+
+        $this->assertEquals(9, $instance->affectedRows());
     }
 }
