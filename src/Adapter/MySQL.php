@@ -52,6 +52,10 @@ class MySQL extends Adapter {
      * return database information
      */
     public function serverInfo() {
+        if ($this->_connectFlag == false && $this->_instance == null) {
+            throw new \Exception('SDB: Required connect first', 1996);
+        }
+
         return $this->_instance->server_info;
     }
 
@@ -293,10 +297,6 @@ class MySQL extends Adapter {
 
         if ($preBuilder['limit'] != null) {
             $sql .= " LIMIT {$preBuilder['limit']}";
-        }
-
-        if ($preBuilder['offset'] != null) {
-            $sql .= " OFFSET {$preBuilder['offset']}";
         }
 
         return $sql;

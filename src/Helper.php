@@ -206,7 +206,7 @@ class Helper {
     public function query($query) {
         $query = trim($query instanceof Query ? $query->__toString() : $query);
 
-        call_user_func_array(array($this->_adapter, 'connect'), self::$_server[array_rand(self::$_server, 1)]);
+        $this->connect();
         return $this->_adapter->query($query);
     }
 
@@ -232,6 +232,18 @@ class Helper {
 
     public function fetchAll() {
         return $this->_adapter->fetchAll();
+    }
+
+    public function affectedRows() {
+        return $this->_adapter->affectedRows();
+    }
+
+    public function connect() {
+        return call_user_func_array(array($this->_adapter, 'connect'), self::$_server[array_rand(self::$_server, 1)]);
+    }
+
+    public function serverInfo() {
+        return $this->_adapter->serverInfo();
     }
 
     # Database: MySQL

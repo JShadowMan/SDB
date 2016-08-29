@@ -128,7 +128,7 @@ class Query {
      */
     public function delete($tables, $using = null) {
         $this->_queryAction = 'DELETE';
-        $this->_table = is_string($tables) ? $tables :
+        $this->_table = is_string($tables) ? $this->_adapterInstance->tableFilter($tables) :
                 ((is_array($tables) ? (array_map(function($t) { return $this->_adapterInstance->tableFilter($t); }, $tables)) :
                         strval($tables)));
         $this->_preBuilder['using'] = $this->_adapterInstance->tableFilter(strval($using));
