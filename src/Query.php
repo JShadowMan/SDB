@@ -49,11 +49,7 @@ class Query {
     private $_queryAction = null;
 
     public function __construct(&$adapterInstance) {
-        if ($adapterInstance instanceof Adapter) {
-            $this->_adapterInstance = $adapterInstance;
-        } else {
-            throw new \Exception('SDB: Query: adapter invalid in Query Constructor', 1996);
-        }
+        $this->_adapterInstance = $adapterInstance;
     }
 
     /**
@@ -261,7 +257,7 @@ class Query {
 
     public function on($expression, $conjunction = Helper::CONJUNCTION_AND) {
         if (!($expression instanceof Expression)) {
-            throw new \Exception('SDB: Query: in WHERE params invalid', 1996);
+            throw new \Exception('SDB: Query: in ON params invalid', 1996);
         }
 
         if (!in_array($conjunction, array(Helper::CONJUNCTION_AND, Helper::CONJUNCTION_OR))) {

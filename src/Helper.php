@@ -60,12 +60,12 @@ class Helper {
         }
         $this->_tablePrefix = $tablePrefix;
 
-        # default using mysql, if mysql is disable, that using first database adapter
+        # default using mysql adapter, if mysql is disable, that throw Exception
         if ($adapter == null) {
             if (in_array(self::ADAPTER_MYSQL, self::$_driver)) {
                 $adapter = self::ADAPTER_MYSQL;
             } else {
-                throw new \Exception('SDB: Default Database adapter not found', 1996);
+                throw new \Exception('SDB: default database adapter(MySQL) not found', 1996);
             }
         }
 
@@ -248,6 +248,14 @@ class Helper {
 
     public function serverInfo() {
         return $this->_adapter->serverInfo();
+    }
+
+    public function reset() {
+        $this->_adapter->reset();
+    }
+
+    public function seek($index) {
+        $this->_adapter->seek(is_int($index) ? $index : intval($index));
     }
 
     # Database: MySQL
