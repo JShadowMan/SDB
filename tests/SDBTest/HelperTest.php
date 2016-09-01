@@ -330,13 +330,21 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals('Jack', $result['name']);
     }
 
+    /**
+     * @expectedException Exception
+     */
+    public function testQuerySimpleSelectUsingInvalidGroup() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group(0));
+    }
+
     public function testQuerySimpleSelectUsingGroupAndHaving() {
         $instance = new Helper('table_');
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group('name')->having(Expression::smallerThan('uid', 2)));
         $result = $instance->fetchAssoc();
         $this->assertEquals('1', $result['id']);
-        $this->assertEquals('John', $result['name']);
     }
 
     public function testQuerySimpleSelectUsingGroupAndHavingOr() {
@@ -368,6 +376,28 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         $instance->query($instance->select(array('table.users.name', 'user'), array('table.options.name', 'option'))->from('table.users')
             ->join('table.options', 'INVALID JOIN')
             ->on(Expression::equal('table.users.uid', 'table.options.for')));
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testQuerySelectUsingInvalidOnForExpression() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->select(array('table.users.name', 'user'), array('table.options.name', 'option'))->from('table.users')
+                ->join('table.options')
+                ->on('INVALID'));
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testQuerySelectUsingInvalidOnForConjunction() {
+        $instance = new Helper('table_');
+    
+        $instance->query($instance->select(array('table.users.name', 'user'), array('table.options.name', 'option'))->from('table.users')
+                ->join('table.options')
+                ->on(Expression::equal('table.users.uid', 'table.options.for'), 'INVALID CONJUNCTION'));
     }
 
     /**
@@ -434,6 +464,15 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         ));
         $instance->query($instance->select('name')->from('table.options'));
         $this->assertEquals(6, count($instance->fetchAll()));
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testQuerySimpleInsertEmptyRows() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->insert('table.options'));
     }
 
     public function testQueryInsertUsingRowsAndKeys() {
@@ -506,6 +545,25 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
 
         $instance->query($instance->select('password')->from('table.users')->where(Expression::equal('name', 'Jack')));
         $this->assertEquals('newJackPassword', $instance->fetchAssoc('password'));
+    }
+
+    public function testQuerySimpleUpdateUsingDEFAULT() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->update('table.options')->set(array(
+            'for' => Helper::DATA_DEFAULT
+        ))->where(Expression::equal('for', '0')));
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testQueryUpdateUsingInvalidSetParams() {
+        $instance = new Helper('table_');
+
+        $instance->query($instance->update('table.users')->set(array(
+            'newJackPassword'
+        ))->where(Expression::equal('name', 'Jack')));
     }
 
     public function testQueryUpdateUsingWhereAndMore() {

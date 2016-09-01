@@ -232,7 +232,7 @@ class MySQL extends Adapter {
 
         $sql .= 'VALUES ';
         if (empty($preBuilder['rows']['values'])) {
-            return null;
+            throw new \Exception('SDB: MySQL: Empty Row(s)', 1996);
         } else {
             foreach ($preBuilder['rows']['values'] as $row) {
                 $sql .= '( ' . implode(', ', array_values($row)) . ' ), ';
