@@ -5,6 +5,9 @@
  * @package SDB
  * @author  ShadowMan
  */
+
+namespace SDB;
+
 use SDB\Helper;
 use SDB\Expression;
 
@@ -12,6 +15,12 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     public function setUp() {
         Helper::disableStrictMode();
         Helper::server('127.0.0.1', 3306, 'root', '', 'test');
+
+        $this->_instance = new Helper('table_');
+    }
+
+    public function tearDown() {
+        unset($this->_instance);
     }
 
     /**
@@ -32,7 +41,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         if (!extension_loaded('mysqli')) {
             $this->expectException('Exception');
         }
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
     }
 
     public function testUnavaliableAdapter() {
@@ -48,7 +57,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
         Helper::cleanServer();
         Helper::server('127.0.0.1', 3306, 'invalidUser', '', 'test');
 
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
         $instance->connect();
     }
 
@@ -58,37 +67,37 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testBuilderReturnType() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $this->assertInstanceOf('SDB\\Query', $instance->builder());
     }
 
     public function testBuildSelectReturnType() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $this->assertInstanceOf('SDB\\Query', $instance->select('fields'));
     }
 
     public function testBuildUpdateReturnType() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $this->assertInstanceOf('SDB\\Query', $instance->update('table'));
     }
 
     public function testBuildInsertReturnType() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $this->assertInstanceOf('SDB\\Query', $instance->insert('table'));
     }
 
     public function testBuildDeletReturnType() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $this->assertInstanceOf('SDB\\Query', $instance->delete('table'));
     }
 
     public function testQuery() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         # Insert Test Data
         $scripts = file_get_contents('test.sql', true);
@@ -102,7 +111,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testUnknownQuery() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->builder());
     }
@@ -111,34 +120,34 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testServerInfoInvalid() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->serverInfo();
     }
 
     public function testServerInfo() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->connect();
         $instance->serverInfo();
     }
 
     public function testFetchAssoc() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query('SELECT 1, 2');
         $this->assertEquals(array('1' => '1', '2' => '2'), $instance->fetchAssoc());
     }
 
     public function testFetchAll() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query('SELECT 1');
         $this->assertEquals(array(array('1' => '1')), $instance->fetchAll());
     }
 
     public function testQuerySimpleSelect() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users'));
         foreach ($instance->fetchAll() as $rowId => $row) {
@@ -158,27 +167,27 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testInvalidQuery() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users')->where(Expression::equal('invalidField', 0)));
     }
 
     public function testQueryFetchRowByKeys() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users'));
         $this->assertEquals('John', $instance->fetchAssoc('name'));
     }
 
     public function testAffectedRows() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.options'));
         $this->assertEquals(2, $instance->affectedRows());
     }
 
     public function testResetInternelPointer() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users'));
         $this->assertEquals('John', $instance->fetchAssoc('name'));
@@ -188,7 +197,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testSeekInternelPointer() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users'));
         $instance->seek(1);
@@ -196,7 +205,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySimpleSelectUsingFields() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select('table.users.uid', 'name')->from('table.users'));
         foreach ($instance->fetchAll() as $rowId => $row) {
@@ -211,7 +220,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySimpleSelectUsingFieldsAlias() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), array('name', 'username'))->from('table.users'));
         foreach ($instance->fetchAll() as $rowId => $row) {
@@ -226,7 +235,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySimpleSelectUsingLimit() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->limit(1));
 
@@ -239,7 +248,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySimpleSelectUsingLimitAndOffset() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->limit(1)->offset(1));
         $result = $instance->fetchAssoc();
@@ -248,14 +257,14 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySelectUsingPage() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->page(1, 1));
         $this->assertEquals(1, count($instance->fetchAll()));
     }
 
     public function testQuerySimpleSelectUsingOrderASC() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->order('id')->limit(1));
 
@@ -268,7 +277,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySimpleSelectUsingOrderDESC() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->order('id', Helper::ORDER_DESC)->limit(1));
         $result = $instance->fetchAssoc();
@@ -280,7 +289,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidOrder() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->order(123));
     }
@@ -289,13 +298,13 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidOrderSort() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
     
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->order('name', 'INVALID_SORT'));
     }
 
     public function testQuerySimpleSelectUsingWhere() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->where(Expression::equal('uid', 2, 'si'), Helper::CONJUNCTION_OR));
         $result = $instance->fetchAssoc();
@@ -307,7 +316,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidWhereExpression() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->where('INVALID EXPRESSION'));
     }
@@ -316,13 +325,13 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidWhereConjunction() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->where(Expression::equal('uid', 2, 'si'), 'INVALID'));
     }
 
     public function testQuerySimpleSelectUsingGroup() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group('name'));
         $result = $instance->fetchAssoc();
@@ -334,21 +343,21 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySimpleSelectUsingInvalidGroup() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group(0));
     }
 
     public function testQuerySimpleSelectUsingGroupAndHaving() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group('name')->having(Expression::smallerThan('uid', 2)));
         $result = $instance->fetchAssoc();
         $this->assertEquals('1', $result['id']);
     }
 
-    public function testQuerySimpleSelectUsingGroupAndHavingOr() {
-        $instance = new Helper('table_');
+    public function testQuerySimpleSelectUsingGroupAndHavingUseOr() {
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group('name')->having(Expression::smallerThan('uid', 2)), Helper::CONJUNCTION_OR);
         $result = $instance->fetchAssoc();
@@ -356,7 +365,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySimpleSelectUsingJoin() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('table.users.name', 'user'), array('table.options.name', 'option'))->from('table.users')
             ->join('table.options')
@@ -371,7 +380,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidJoin() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('table.users.name', 'user'), array('table.options.name', 'option'))->from('table.users')
             ->join('table.options', 'INVALID JOIN')
@@ -382,7 +391,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidOnForExpression() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select(array('table.users.name', 'user'), array('table.options.name', 'option'))->from('table.users')
                 ->join('table.options')
@@ -393,7 +402,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidOnForConjunction() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
     
         $instance->query($instance->select(array('table.users.name', 'user'), array('table.options.name', 'option'))->from('table.users')
                 ->join('table.options')
@@ -404,7 +413,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidOnExpression() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users')
             ->join('table.options', 'INVALID JOIN')
@@ -415,7 +424,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidOnConjunction() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users')
             ->join('table.options', 'INVALID JOIN')
@@ -426,7 +435,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidHavingExpression() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users')->having('INVALID EXPRESSION'));
     }
@@ -435,13 +444,13 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySelectUsingInvalidHavingConjunction() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->select()->from('table.users')->having(Expression::equal('table.users.uid', 'table.options.for'), 'INVALID CONJUNCTION'));
     }
 
     public function testQuerySimpleInsert() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.users')->rows(array(
             'name'     => 'Lisa',
@@ -454,7 +463,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySimpleInsertMultiRows() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.options')->keys('name', 'value')->values(
             array('options1', 'value1'),
@@ -470,13 +479,13 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQuerySimpleInsertEmptyRows() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.options'));
     }
 
     public function testQueryInsertUsingRowsAndKeys() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.options')->rows(array( 'name' => 'options000', 'value' => 'value000' ))->keys('name', 'value')->values(
             array('options111', 'value111')
@@ -490,7 +499,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQueryInsertInvalidValues() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.options')->values(
             array('options111', 'value111')
@@ -501,7 +510,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQueryNotMatchKeyValue() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.options')->keys('name')->values(
             array('options111', 'value111')
@@ -509,7 +518,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQueryUsingDefault() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.options')->keys('name', 'value', 'for')->values(
             array('options222', 'value222', Helper::DATA_DEFAULT)
@@ -520,7 +529,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQueryInsertSelect() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.options')->keys('name', 'value')->insertSelect($instance->select('value', 'name')->from('table.options')));
         $instance->query($instance->select('name')->from('table.options'));
@@ -531,13 +540,13 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQueryInsertInvalidSelect() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->insert('table.options')->keys('name', 'value')->insertSelect('INVALID QUERY'));
     }
 
     public function testQuerySimpleUpdate() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->update('table.users')->set(array(
             'password' => 'newJackPassword'
@@ -548,7 +557,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQuerySimpleUpdateUsingDEFAULT() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->update('table.options')->set(array(
             'for' => Helper::DATA_DEFAULT
@@ -559,7 +568,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQueryUpdateUsingInvalidSetParams() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->update('table.users')->set(array(
             'newJackPassword'
@@ -567,18 +576,18 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQueryUpdateUsingWhereAndMore() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->update('table.options')->set(array(
             'for' => '9'
         ))->where(Expression::equal('for', '0'))->order('name')->limit(5));
 
-        $instance->query($instance->select('name')->from('table.options')->order('name')->where(Expression::equal('table.options.for', '9')));
+        $instance->query($instance->select('name')->from('table.options')->order('name')->where(Expression::equal('table.options.for', '9'), Helper::CONJUNCTION_OR));
         $this->assertEquals(5, count($instance->fetchAll()));
     }
 
     public function testQueryDelete() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->delete('table.options')->where(Expression::equal('for', '9')));
         $instance->query($instance->select('name')->from('table.options'));
@@ -586,15 +595,16 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testQueryDeleteUsingMoreOptions() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
-        $instance->query($instance->delete('table.options')->order('value')->where(Expression::equal('for', '0'))->limit(1));
+        $instance->query($instance->delete('table.options')->order('value')->where(Expression::equal('for', '0'))
+                ->where(Expression::equal('for', '0'), Helper::CONJUNCTION_OR)->limit(1));
         $instance->query($instance->select('name')->from('table.options'));
         $this->assertEquals(12, count($instance->fetchAll()));
     }
 
     public function testQueryMultiTableDelete() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->delete(array('table.articles', 'table.options', 'table.users'), 'table.users')
                 ->join(array('table.options', 'table.articles'))
@@ -610,7 +620,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * @expectedException Exception
      */
     public function testQueryInvalidMultiTableDelete() {
-        $instance = new Helper('table_');
+        $instance = $this->_instance;
 
         $instance->query($instance->delete(array('table.articles', 'table.options', 'table.users')));
     }

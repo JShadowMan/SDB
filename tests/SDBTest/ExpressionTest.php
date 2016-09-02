@@ -4,6 +4,7 @@
  * @author ShadowMan
  */
 
+namespace SDB;
 use SDB\Expression;
 
 class ExpressionTest extends \PHPUnit_Framework_TestCase {
