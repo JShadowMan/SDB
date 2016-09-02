@@ -45,7 +45,9 @@ class PDO_MySQL extends MySQL {
             $result = $this->_instance->query($query, \PDO::FETCH_ASSOC);
 
             if ($this->_instance->errorCode() != '00000') {
-                throw new \Exception("SDB: MySQL: {$this->_instance->errorCode()}: {$this->_instance->errorInfo()}", 1996);
+                $error = $this->_instance->errorInfo();
+                $error = is_array($error) ? array_pop($error) : $error;
+                throw new \Exception("SDB: MySQL: {$this->_instance->errorCode()}: {$error}", 1996);
             }
 
             if ($result instanceof \PDOStatement) {
