@@ -254,7 +254,7 @@ class MySQL extends Adapter {
         $sql .= is_array($table) ? implode(', ', $table) : $table;
 
         if (is_array($table)) {
-            if ($preBuilder['using'] == null) {
+            if (strlen($preBuilder['using']) === 0) {
                 throw new \Exception('SDB: MySQL: syntax error for multi-table delete', 1996);
             } else {
                 $sql .= ' USING ' . $preBuilder['using'];
