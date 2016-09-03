@@ -38,6 +38,13 @@ class Query {
     private $_adapterInstance = null;
 
     /**
+     * helper instance
+     * 
+     * @var Helper
+     */
+    private $_helperInstance = null;
+
+    /**
      * default table name
      *
      * @var string
@@ -48,8 +55,14 @@ class Query {
 
     private $_queryAction = null;
 
-    public function __construct(&$adapterInstance) {
-        $this->_adapterInstance = $adapterInstance;
+    public function __construct(&$adapterInstance, &$helperInstance) {
+        if ($adapterInstance instanceof Adapter) {
+            $this->_adapterInstance = $adapterInstance;
+        }
+
+        if ($helperInstance instanceof Helper) {
+            $this->_helperInstance  = $helperInstance;
+        }
     }
 
     /**
@@ -314,5 +327,11 @@ class Query {
             case 'DELETE': return $this->_adapterInstance->parseDelete($this->_preBuilder, $this->_table); break;
             default: throw new \Exception('SDB: Query: unknown query action or undefined action', 1996);
         }
+    }
+
+    public function query() {
+        $this->_helperInstance->connect();
+
+        return $this->_adapterInstance->query($this->__toString());
     }
 }

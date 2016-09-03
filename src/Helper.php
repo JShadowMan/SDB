@@ -165,7 +165,7 @@ class Helper {
      * @return \SDB\Query
      */
     public function builder() {
-        return new Query($this->_adapter);
+        return new Query($this->_adapter, $this);
     }
 
     /**
@@ -213,22 +213,6 @@ class Helper {
         $this->connect();
         return $this->_adapter->query($query);
     }
-
-//     public function preQuery($alias, $query) {
-        
-//     }
-
-//     public function prepare() {
-        
-//     }
-
-//     public function params() {
-        
-//     }
-
-//     public function functions($function, $args = null) {
-        
-//     }
 
     public function fetchAssoc($keys = null) {
         return $this->_adapter->fetchAssoc($keys);
@@ -315,9 +299,12 @@ class Helper {
     # Conjunction: OR
     const CONJUNCTION_OR     = 'OR';
 
+    # Join: INNER JOIN
     const JOIN_INNER         = 'INNER JOIN';
 
+    # Join: LEFT JOIN
     const JOIN_LEFT          = 'LEFT JOIN';
 
+    # Join: RIGHT JOIN
     const JOIN_RIGHT          = 'RIGHT JOIN';
 }

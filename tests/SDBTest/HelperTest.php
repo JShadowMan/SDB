@@ -12,9 +12,16 @@ use SDB\Helper;
 use SDB\Expression;
 
 class HelperTest extends \PHPUnit_Framework_TestCase {
+    /**
+     * server info
+     * 
+     * @var array
+     */
+    protected $_server = array('127.0.0.1', 3306, 'root', '', 'test');
+
     public function setUp() {
         Helper::disableStrictMode();
-        Helper::server('127.0.0.1', 3306, 'root', '', 'test');
+        call_user_func_array(array('SDB\\Helper', 'server'), $this->_server);
 
         $this->_instance = new Helper('table_');
     }
@@ -63,7 +70,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
 
     public function testAddServer() {
         Helper::cleanServer();
-        Helper::server('127.0.0.1', 3306, 'root', '', 'test');
+        call_user_func_array(array('SDB\\Helper', 'server'), $this->_server);
     }
 
     public function testBuilderReturnType() {
@@ -161,6 +168,13 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
                 $this->assertEquals('JackPassword', $row['password']);
             }
         }
+    }
+
+    public function testListOfQuery() {
+        $instance = $this->_instance;
+
+        $instance->select()->from('table.users')->query();
+        $this->assertEquals(array('uid' => '1', 'name' => 'John', 'password' => 'JohnPassword'), $instance->fetchAssoc());
     }
 
     /**

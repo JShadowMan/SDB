@@ -8,7 +8,7 @@ use SDB\HelperTest;
 class PDO_MySQLTest extends HelperTest {
     public function setUp() {
         Helper::disableStrictMode();
-        Helper::server('127.0.0.1', 3306, 'root', '', 'test');
+        call_user_func_array(array('SDB\\Helper', 'server'), $this->_server);
 
         $this->_instance = new Helper('table_', Helper::ADAPTER_PDO_MYSQL);
     }
