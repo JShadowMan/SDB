@@ -42,10 +42,11 @@ $result = array(
 
 Table of Contents
 ---
-- [Requirements](#Requirements)
-- [Installation](#Installation)
-- [Usage](#Usage)
-- [License](#License)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Features](#features)
+- [Usage](#usage)
+- [License](#license)
 
 
 Requirements
@@ -60,11 +61,20 @@ Installation is possible using Composer
 composer require jshadowman/sdb
 ```
 
+Features
+--------
+- List of Programming
+- Automatically generated query
+- Humanization design
+- Expandability
+- PSR4 standard
+- Secure
+
 Usage
 -----
 - **SELECT**
 
-Simple Example like following. [Complete SELECT documentation]()
+Simple Example like following. [Complete SELECT documentation]
 
 ```php
 <?php
@@ -84,7 +94,7 @@ $helper->select()->from('table.students')->order('name')->limit(5)->query();
 
 - **INSERT**
 
-Simple Example like following. [Complete INSERT documentation]()
+Simple Example like following. [Complete INSERT documentation]
 
 ```php
 <?php
@@ -109,7 +119,7 @@ $helper->insert('table.students')->rows(array(
 
 - **UPDATE**
 
-Simple Example like following. [Complete UPDATE documentation]()
+Simple Example like following. [Complete UPDATE documentation]
 
 ```php
 <?php
@@ -132,7 +142,7 @@ $helper->update('table.students')->set(array(
 
 - **DELETE**
 
-Simple Example like following. [Complete DELETE documentation]()
+Simple Example like following. [Complete DELETE documentation]
 
 ```php
 <?php
@@ -150,6 +160,11 @@ $helper = new Helper('table_');
 # Execute SELECT query
 $helper->delete('table.students')->where(Expression::equal('name', 'Amy'))->query();
 ```
+
+[Complete SELECT documentation]: https://github.com/JShadowMan/SDB/blob/master/documents/SELECT.md
+[Complete INSERT documentation]: https://github.com/JShadowMan/SDB/blob/master/documents/INSERT.md
+[Complete UPDATE documentation]: https://github.com/JShadowMan/SDB/blob/master/documents/UPDATE.md
+[Complete DELETE documentation]: https://github.com/JShadowMan/SDB/blob/master/documents/DELETE.md
 
 License
 -------
