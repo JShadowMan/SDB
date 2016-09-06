@@ -140,7 +140,7 @@ class Query {
         $this->_table = is_string($tables) ? $this->_adapterInstance->tableFilter($tables) :
                 ((is_array($tables) ? (array_map(function($t) { return $this->_adapterInstance->tableFilter($t); }, $tables)) :
                         strval($tables)));
-        $this->_preBuilder['using'] = $this->_adapterInstance->tableFilter(strval($using));
+        $this->_preBuilder['using'] = ($using === null) ? '' : $this->_adapterInstance->tableFilter(strval($using));
 
         return $this;
     }

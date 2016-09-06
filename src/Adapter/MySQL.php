@@ -306,7 +306,7 @@ class MySQL extends Adapter {
      */
     public function quoteKey($string) {
         if (!is_string($string)) {
-            $string = strval($string);
+            throw new \Exception('SDB: MySQL: the key must string', 1996);
         }
 
         $length = strlen($string);
@@ -380,7 +380,7 @@ class MySQL extends Adapter {
             $values = array();
 
             foreach ($keys as $key) {
-                $values[] = isset($this->_result[$this->_resultCurrentIndex][$key]) ? $this->_result[$this->_resultCurrentIndex][$key] : null;
+                $values[$key] = isset($this->_result[$this->_resultCurrentIndex][$key]) ? $this->_result[$this->_resultCurrentIndex][$key] : null;
             }
             $this->_resultCurrentIndex += 1;
             return $values;
