@@ -643,7 +643,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
                 ->where(Expression::equal('table.users.uid', '1'))
         );
 
-        $this->assertEquals(15, $instance->affectedRows());
+        $this->assertEquals(3, $instance->affectedRows());
     }
 
     /**
