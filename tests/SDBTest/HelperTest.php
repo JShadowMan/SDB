@@ -17,7 +17,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * 
      * @var array
      */
-    protected $_server = array('127.0.0.1', 3306, 'root', 'root', 'test');
+    protected $_server = array('127.0.0.1', 3306, 'root', '', 'test');
 
     public function setUp() {
         Helper::disableStrictMode();
