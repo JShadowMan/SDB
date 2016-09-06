@@ -17,7 +17,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
      * 
      * @var array
      */
-    protected $_server = array('127.0.0.1', 3306, 'root', '', 'test');
+    protected $_server = array('127.0.0.1', 3306, 'root', 'root', 'test');
 
     public function setUp() {
         Helper::disableStrictMode();
@@ -168,6 +168,13 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
                 $this->assertEquals('JackPassword', $row['password']);
             }
         }
+    }
+
+    public function testFetchAssocByArray() {
+        $instance = $this->_instance;
+
+        $instance->query($instance->select()->from('table.users'));
+        $this->assertEquals(array('uid' => '1', 'name' => 'John'), $instance->fetchAssoc(array('uid', 'name')));
     }
 
     public function testListOfQuery() {
@@ -373,7 +380,7 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     public function testQuerySimpleSelectUsingGroupAndHavingUseOr() {
         $instance = $this->_instance;
 
-        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group('name')->having(Expression::smallerThan('uid', 2)), Helper::CONJUNCTION_OR);
+        $instance->query($instance->select(array('uid', 'id'), 'name')->from('table.users')->group('name')->having(Expression::smallerThan('uid', 2), Helper::CONJUNCTION_OR));
         $result = $instance->fetchAssoc();
         $this->assertEquals('1', $result['id']);
     }
@@ -492,6 +499,15 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
     /**
      * @expectedException Exception
      */
+    public function testQueryInsertUsingInvalidKey() {
+        $instance = $this->_instance;
+
+        $instance->query($instance->insert('table.options')->keys(1, 2, 3));
+    }
+
+    /**
+     * @expectedException Exception
+     */
     public function testQuerySimpleInsertEmptyRows() {
         $instance = $this->_instance;
 
@@ -594,9 +610,9 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
 
         $instance->query($instance->update('table.options')->set(array(
             'for' => '9'
-        ))->where(Expression::equal('for', '0'))->order('name')->limit(5));
+        ))->where(Expression::equal('for', '0'), Helper::CONJUNCTION_OR)->order('name')->limit(5));
 
-        $instance->query($instance->select('name')->from('table.options')->order('name')->where(Expression::equal('table.options.for', '9'), Helper::CONJUNCTION_OR));
+        $instance->query($instance->select('name')->from('table.options')->order('name')->where(Expression::equal('table.options.for', '9')));
         $this->assertEquals(5, count($instance->fetchAll()));
     }
 
@@ -622,8 +638,8 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
 
         $instance->query($instance->delete(array('table.articles', 'table.options', 'table.users'), 'table.users')
                 ->join(array('table.options', 'table.articles'))
-                ->on(Expression::equal('table.users.uid', 'table.options.for'), Helper::CONJUNCTION_OR)
-                ->on(Expression::equal('table.users.uid', 'table.articles.parent'))
+                ->on(Expression::equal('table.users.uid', 'table.options.for'))
+                ->on(Expression::equal('table.users.uid', 'table.articles.parent'), Helper::CONJUNCTION_OR)
                 ->where(Expression::equal('table.users.uid', '1'))
         );
 
