@@ -12,9 +12,9 @@ class MySQL extends Adapter {
     /**
      * check mysql avaliable
      * 
-     * @see \SDB\Abstracts\Adapter::avaliable()
+     * @see \SDB\Abstracts\Adapter::available()
      */
-    public function avaliable() {
+    public function available() {
         return class_exists('mysqli') ? true : false;
     }
 

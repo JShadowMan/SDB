@@ -75,7 +75,7 @@ class Helper {
 
         # if adapter avaliable, creating the instance
         $adapter = "SDB\\Adapter\\{$adapter}";
-        if (!call_user_func(array(($this->_adapter = new $adapter($this->_tablePrefix)), 'avaliable'))) {
+        if (!call_user_func(array(($this->_adapter = new $adapter($this->_tablePrefix)), 'available'))) {
             unset($this->_adapter);
             throw new \Exception('SDB: adapter is not avaliable', 1996);
         }

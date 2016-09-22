@@ -15,9 +15,9 @@ class PDO_MySQL extends MySQL {
     /**
      * PDO Version
      * 
-     * @see \SDB\Adapter\MySQL::avaliable()
+     * @see \SDB\Adapter\MySQL::available()
      */
-    public function avaliable() {
+    public function available() {
         return extension_loaded('pdo_mysql');
     }
 

@@ -11,7 +11,7 @@ abstract class Adapter {
      * 
      * @return boolean
      */
-    abstract public function avaliable();
+    abstract public function available();
 
     /**
      * connect to database
