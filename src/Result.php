@@ -85,15 +85,8 @@ class Result {
         $this->_currentRow = 0;
     }
 
-    /**
-     * Magic method
-     * 
-     * @param unknown $name
-     */
-    public function __get($name) {
-        $name = '_' + $name;
-
-        return $this->{$name};
+    public function affectedRow() {
+        return $this->_affectedRows;
     }
 }
 

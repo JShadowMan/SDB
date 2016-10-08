@@ -654,4 +654,101 @@ class HelperTest extends \PHPUnit_Framework_TestCase {
 
         $instance->query($instance->delete(array('table.articles', 'table.options', 'table.users')));
     }
+
+    public function testPreQuery() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('options', $instance->select()->from('table.options'));
+        $instance->registerPreQuery('users', $instance->select()->from('table.users'));
+
+        $result = $instance->executePreQuery('options');
+        $result = $instance->executePreQuery('users');
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testInvalidPreQueryAlias() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('equal', $instance->select()->from('table.users'));
+        $instance->registerPreQuery('equal', $instance->select()->from('table.users'));
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testPreQueryAliasIsNotString() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery(1, $instance->select()->from('table.users'));
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testPreQuerySqlIsNotClassQuery() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('name', $instance);
+    }
+
+    /**
+     * @expectedException Exception
+     */
+    public function testQueryNotExistsAliasName() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('name', $instance);
+        $instance->executePreQuery('other');
+    }
+
+    public function testQueryPreSqlFetchAll() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('users', $instance->select()->from('table.users'));
+
+        $result = $instance->executePreQuery('users');
+        $result->fetchAll();
+    }
+
+    public function testQueryPreSqlFetchOne() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('users', $instance->select()->from('table.users'));
+
+        $result = $instance->executePreQuery('users');
+        $result->fetch('name', 'email');
+    }
+
+    public function testResetResultInternalPointer() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('users', $instance->select()->from('table.users'));
+
+        $result = $instance->executePreQuery('users');
+        $result->fetchAll();
+        $result->reset();
+        $result->fetch('name', 'email');
+    }
+
+    public function testSeekResultInternalPointer() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('users', $instance->select()->from('table.users'));
+
+        $result = $instance->executePreQuery('users');
+        $result->fetchAll();
+        $result->seek(1);
+        $result->fetch('name', 'email');
+    }
+
+    public function testFromResultGettingProperty() {
+        $instance = $this->_instance;
+
+        $instance->registerPreQuery('users', $instance->select()->from('table.users'));
+        $result = $instance->executePreQuery('users');
+
+        $this->assertInternalType('int', $result->affectedRow());
+    }
 }

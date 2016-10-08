@@ -414,9 +414,9 @@ class MySQL extends Adapter {
                         (end($stack) == '[' && $ch == ']') ||
                         (end($stack) == '{' && $ch == '}')) {
                             array_pop($stack);
-                        } else {
-                            return false;
-                        }
+                } else {
+                    return false;
+                }
             }
         }
 

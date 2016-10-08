@@ -11,6 +11,8 @@
  */
 namespace SDB;
 
+use SDB\Result;
+
 class Helper {
     /**
      * server information
@@ -46,6 +48,11 @@ class Helper {
      */
     private $_tablePrefix = null;
 
+    /**
+     * pre-query set
+     *
+     * @var array
+     */
     private $_preQueryPool = array();
 
     /**
@@ -240,6 +247,31 @@ class Helper {
 
     public function seek($index) {
         $this->_adapter->seek(is_int($index) ? $index : intval($index));
+    }
+
+    public function registerPreQuery($alias, $query) {
+        if (!is_string($alias)) {
+            throw new \Exception('SDB: alias name must string type', 1996);
+        }
+
+        if (!($query instanceof Query)) {
+           throw new \Exception('SDB: pre query statement must Query type', 1996);
+        }
+
+        if (array_key_exists($alias, $this->_preQueryPool)) {
+            throw new \Exception('SDB: alias name exists in pool', 1996);
+        }
+
+        $this->_preQueryPool[$alias] = $query;
+    }
+
+    public function executePreQuery($alias) {
+        if (!array_key_exists($alias, $this->_preQueryPool)) {
+            throw new \Exception('SDB: alias name not found in preQueryPool', 1996);
+        }
+
+        $this->query($this->_preQueryPool[$alias]);
+        return new Result($this->fetchAll(), $this->affectedRows());
     }
 
     # Database: MySQL
